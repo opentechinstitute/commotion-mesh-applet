@@ -1,0 +1,4 @@
+debian/files
+debian/nm-dispatcher-olsrd-applet.debhelper.log
+debian/nm-dispatcher-olsrd-applet.substvars
+debian/nm-dispatcher-olsrd-applet/
