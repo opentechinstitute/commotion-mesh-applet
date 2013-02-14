@@ -1,0 +1,6 @@
+org.gnome.applets.nm-dispatcher-olsrd-applet.panel-applet usr/share/gnome-panel/4.0/applets/
+org.gnome.panel.applet.nm-dispatcher-olsrd-applet.service usr/share/dbus-1/services/
+nm-dispatcher-olsrd-applet-factory2.py usr/lib/gnome-applets
+nm-dispatcher-olsrd-applet-factory3.py usr/lib/gnome-applets
+nm-dispatcher-olsrd-appletApplet.py usr/lib/gnome-applets
+nm-dispatcher-olsrd-applet.server usr/lib/bonobo/servers

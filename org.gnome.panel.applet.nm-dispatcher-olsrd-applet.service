@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.gnome.panel.applet.nm-dispatcher-olsrd-appletFactory
+Exec=/usr/lib/gnome-applets/nm-dispatcher-olsrd-applet-factory3.py

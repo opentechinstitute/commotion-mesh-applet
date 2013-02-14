@@ -1,0 +1,5 @@
+nm-dispatcher-olsrd-applet (0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Hans-Christoph Steiner <hans@eds.org>  Thu, 14 Feb 2013 21:17:07 +0000

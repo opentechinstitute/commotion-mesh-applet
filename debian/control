@@ -1,0 +1,19 @@
+Source: nm-dispatcher-olsrd-applet
+Section: gnome
+Priority: extra
+Maintainer: Hans-Christoph Steiner <hans@eds.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+#Homepage: <insert the upstream URL, if relevant>
+
+Package: nm-dispatcher-olsrd-applet
+Architecture: any
+Depends: nm-dispatcher-olsrd,
+         ${shlibs:Depends},
+         ${misc:Depends},
+         gir1.2-gtk-3.0 | python-gtk2,
+         gir1.2-panelapplet-4.0 | python-gnomeapplet,
+         gnome-icon-theme,
+         gnome-panel
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
