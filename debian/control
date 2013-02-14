@@ -11,9 +11,11 @@ Architecture: any
 Depends: nm-dispatcher-olsrd,
          ${shlibs:Depends},
          ${misc:Depends},
+         python,
          gir1.2-gtk-3.0 | python-gtk2,
          gir1.2-panelapplet-4.0 | python-gnomeapplet,
          gnome-icon-theme,
          gnome-panel
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: represent the state of an olsrd mesh connection
+ This GNOME 2.x/3.x panel applet will show the status of an olsrd mesh
+ connection, and provide easy access to debug information and mesh profiles.
