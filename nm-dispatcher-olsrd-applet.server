@@ -13,7 +13,7 @@
   </oaf_server>
 	<oaf_server iid="OAFIID:nm-dispatcher-olsrd-applet"
 				type="factory"
-				location='OAFIID:nm-dispatcher-olsrd-applet_Factory'>
+				location="OAFIID:nm-dispatcher-olsrd-applet_Factory">
 
 			<oaf_attribute name="repo_ids" type="stringv">
 					<item value="IDL:GNOME/Vertigo/PanelAppletShell:1.0"/>
