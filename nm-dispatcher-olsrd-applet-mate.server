@@ -1,0 +1,27 @@
+<oaf_info>
+	<oaf_server iid="OAFIID:MATE_nm-dispatcher-olsrd-applet_Factory"
+		type="exe"
+		location="/usr/lib/mate-applets/nm-dispatcher-olsrd-applet-factoryMate.py">
+        <oaf_attribute name="repo_ids" type="stringv">
+                <item value="IDL:MateComponent/GenericFactory:1.0"/>
+                <item value="IDL:MateComponent/Unknown:1.0"/>
+        </oaf_attribute>
+        <oaf_attribute name="name" type="string" value="nm-dispatcher-olsrd-applet"/>
+        <oaf_attribute name="description" type="string" value="represent the state of an olsrd mesh connection"/>
+  </oaf_server>
+
+	<oaf_server iid="OAFIID:MATE_nm-dispatcher-olsrd-applet"
+				type="factory"
+				location="OAFIID:MATE_nm-dispatcher-olsrd-applet_Factory">
+
+			<oaf_attribute name="repo_ids" type="stringv">
+					<item value="IDL:MATE/Vertigo/MatePanelAppletShell:1.0"/>
+					<item value="IDL:MateComponent/Control:1.0"/>
+					<item value="IDL:MateComponent/Unknown:1.0"/>
+			</oaf_attribute>
+			<oaf_attribute name="name" type="string" value="nm-dispatcher-olsrd-applet"/>
+			<oaf_attribute name="description" type="string" value="represent the state of an olsrd mesh connection"/>
+			<oaf_attribute name="panel:category" type="string" value="System"/>
+			<oaf_attribute name="panel:icon" type="string" value="time-admin.png"/>
+	</oaf_server>
+</oaf_info>
