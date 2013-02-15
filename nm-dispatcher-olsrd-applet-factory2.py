@@ -5,7 +5,7 @@ import gtk
 import pygtk
 pygtk.require('2.0')
 import gnomeapplet
-from nm-dispatcher-olsrd-appletApplet import applet_factory
+from nm_dispatcher_olsrd_applet import applet_factory
 
 if __name__ == '__main__':	 # testing for execution
 	print('Starting factory')

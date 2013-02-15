@@ -2,7 +2,7 @@ org.gnome.applets.nm-dispatcher-olsrd-applet.panel-applet usr/share/gnome-panel/
 org.gnome.panel.applet.nm-dispatcher-olsrd-applet.service usr/share/dbus-1/services/
 nm-dispatcher-olsrd-applet-factory2.py usr/lib/gnome-applets
 nm-dispatcher-olsrd-applet-factory3.py usr/lib/gnome-applets
-nm-dispatcher-olsrd-appletApplet.py usr/lib/gnome-applets
+nm_dispatcher_olsrd_applet.py usr/lib/gnome-applets
 nm-dispatcher-olsrd-applet.server usr/lib/bonobo/servers
 nm-dispatcher-olsrd-applet-factoryMate.py /usr/lib/mate-applets
 nm-dispatcher-olsrd-applet-mate.server usr/lib/matecomponent/servers

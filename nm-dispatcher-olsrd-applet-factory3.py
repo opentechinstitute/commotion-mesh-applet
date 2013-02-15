@@ -3,7 +3,7 @@
 import sys
 from gi.repository import Gtk
 from gi.repository import PanelApplet
-from nm-dispatcher-olsrd-appletApplet import applet_factory
+from nm_dispatcher_olsrd_applet import applet_factory
 
 if __name__ == '__main__':	# testing for execution
 	print('Starting factory')
