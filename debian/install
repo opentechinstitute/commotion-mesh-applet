@@ -6,3 +6,6 @@ nm_dispatcher_olsrd_applet.py usr/lib/gnome-applets
 nm-dispatcher-olsrd-applet.server usr/lib/bonobo/servers
 nm-dispatcher-olsrd-applet-factoryMate.py /usr/lib/mate-applets
 nm-dispatcher-olsrd-applet-mate.server usr/lib/matecomponent/servers
+commotion.svg                   usr/share/icons/hicolor/scalable/apps/
+commotion-mesh-connected.svg    usr/share/icons/hicolor/scalable/apps/
+commotion-mesh-disconnected.svg usr/share/icons/hicolor/scalable/apps/
