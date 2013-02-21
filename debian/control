@@ -16,6 +16,7 @@ Depends: nm-dispatcher-olsrd,
          gir1.2-panelapplet-4.0 | python-gnomeapplet | libmatepanelapplet,
          gnome-icon-theme | mate-icon-theme,
          gnome-panel | mate-panel
+Recommends: network-manager-gnome
 Description: represent the state of an olsrd mesh connection
  This GNOME 2.x/3.x panel applet will show the status of an olsrd mesh
  connection, and provide easy access to debug information and mesh profiles.
