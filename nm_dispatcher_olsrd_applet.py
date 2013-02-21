@@ -1,6 +1,9 @@
 
+import glob
 import re
 import sys
+
+import pprint
 
 try:
     from gi.repository import Gtk
@@ -8,32 +11,48 @@ except: # Can't use ImportError, as gi.repository isn't quite that nice...
     import gtk as Gtk
 
 
+
+def add_menu_item(menu, name, function):
+    item = Gtk.ImageMenuItem(name)
+    item.show()
+    item.connect( "activate", function)
+    menu.add(item)
+
+
+def choose_profile(*arguments):
+    print('choose_profile: '),
+    pprint.pprint(arguments)
+    print('Launching: ' + arguments[0].get_name())
+
+
 def show_menu(widget, event, applet):
-    print('--------------------------------------------------')
-    print('show_menu: '),
-    print(widget),
-    print(event),
-    print(applet)
-    #if event.type == Gtk.gdk.BUTTON_PRESS and event.button == 1:
-    create_menu(applet)
-    widget.emit_stop_by_name("button_press_event")
+    if event.type == Gtk.gdk.BUTTON_PRESS and \
+        (event.button == 1 or event.button == 3):
+        menu = Gtk.Menu()
+
+        for f in glob.glob('/etc/nm-dispatcher-olsrd/*.profile'):
+            m = re.match('/etc/nm-dispatcher-olsrd/(.*)\.profile', f)
+            if m:
+                add_menu_item(menu, m.group(1), choose_profile)
+        sep0 = Gtk.SeparatorMenuItem(); sep0.show(); menu.add(sep0)
+        add_menu_item(menu, 'Show Mesh Status', show_mesh_status)
+        sep1 = Gtk.SeparatorMenuItem(); sep1.show(); menu.add(sep1)
+        add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
+        add_menu_item(menu, Gtk.STOCK_HELP, show_help)
+        add_menu_item(menu, Gtk.STOCK_QUIT, do_exit)
+        menu.popup( None, None, None, event.button, event.time )
+
+        widget.emit_stop_by_name("button_press_event")
 
 
-def create_menu(applet):
-    button3="""
-<popup name="button3">
-  <separator />
-  <menuitem name="About" verb="About" label="_About" pixtype="stock" pixname="gtk-about"/>
-  <menuitem name="Quit" verb="Quit" label="_Quit" pixtype="stock" pixname="exit"/>
-</popup>
-"""
-    button1 = re.sub('name="button3"', 'name="button1"', button3)
-    verbs = [("About", show_about),
-             ("Quit", do_exit)]
-    applet.setup_menu(button3, verbs, None)
-    applet.setup_menu(button1, verbs, None)
-    print('create_menu: '),
-    print(applet)
+def show_mesh_status(*arguments):
+    print('show_mesh_status'),
+    pprint.pprint(arguments)
+
+
+def show_help(*arguments):
+    print('show_help'),
+    pprint.pprint(arguments)
 
 
 def show_about(*arguments):
