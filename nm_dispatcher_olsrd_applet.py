@@ -13,9 +13,26 @@ except: # Can't use ImportError, as gi.repository isn't quite that nice...
 
 
 def add_menu_item(menu, name, function, image=None):
+
+
+def get_profiles():
+    '''get all the available mesh profiles and return as a list of tuples'''
+    profiles = []
+    for f in glob.glob('/etc/nm-dispatcher-olsrd/*.profile'):
+        p = pyjavaproperties.Properties()
+        p.load(open(f))
+        bssid = p['bssid'].upper()
+        channel = int(p['channel'])
+        profiles.append(tuple([p['ssid'], bssid, channel]))
+    return tuple(profiles)
+
+
+def add_menu_item(menu, name, function, imagefile=None):
     item = Gtk.ImageMenuItem(name)
-    if image:
-        item.set_image(image)
+    if imagefile:
+        icon = Gtk.Image()
+        icon.set_from_file(imagefile)
+        item.set_image(icon)
     item.show()
     item.connect( "activate", function)
     menu.add(item)
@@ -32,12 +49,11 @@ def show_menu(widget, event, applet):
         (event.button == 1 or event.button == 3):
         menu = Gtk.Menu()
 
-        present_icon = Gtk.Image()
-        present_icon.set_from_file('/usr/share/icons/hicolor/22x22/apps/nm-adhoc.png')
-        for f in glob.glob('/etc/nm-dispatcher-olsrd/*.profile'):
-            m = re.match('/etc/nm-dispatcher-olsrd/(.*)\.profile', f)
-            if m:
-                add_menu_item(menu, m.group(1), choose_profile, present_icon)
+        profiles = get_profiles()
+
+        for name, profile in profiles:
+            add_menu_item(menu, name, choose_profile)
+#'/usr/share/icons/hicolor/22x22/apps/nm-adhoc.png'
         sep0 = Gtk.SeparatorMenuItem(); sep0.show(); menu.add(sep0)
         add_menu_item(menu, 'Show Mesh Status', show_mesh_status)
         add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
