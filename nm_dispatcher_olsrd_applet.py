@@ -1,5 +1,7 @@
 
 import glob
+import NetworkManager
+import pyjavaproperties
 import re
 import sys
 
@@ -11,8 +13,24 @@ except: # Can't use ImportError, as gi.repository isn't quite that nice...
     import gtk as Gtk
 
 
-
-def add_menu_item(menu, name, function, image=None):
+def get_visible_adhocs():
+    actives = []
+    nets = []
+    strengths = dict()
+    for ac in NetworkManager.NetworkManager.ActiveConnections:
+        for d in ac.Devices:
+            if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
+                wireless = d.SpecificDevice()
+                aap = wireless.ActiveAccessPoint
+                if aap.Mode == NetworkManager.NM_802_11_MODE_ADHOC:
+                    channel = (aap.Frequency - 2407) / 5
+                    actives.append(tuple([aap.Ssid, aap.HwAddress, channel]))
+                for ap in wireless.GetAccessPoints():
+                    if ap.Mode == NetworkManager.NM_802_11_MODE_ADHOC:
+                        channel = (aap.Frequency - 2407) / 5
+                        nets.append(tuple([ap.Ssid, ap.HwAddress, channel]))
+                        strengths[ap.Ssid] = ap.Strength
+    return [tuple(actives), tuple(nets), strengths]
 
 
 def get_profiles():
@@ -38,6 +56,31 @@ def add_menu_item(menu, name, function, imagefile=None):
     menu.add(item)
 
 
+def add_menu_label(menu, name):
+    item = Gtk.ImageMenuItem(name)
+    item.set_sensitive(False)
+    item.show()
+    menu.add(item)
+
+
+def add_visible_profile_menu_item(menu, name, function, strength):
+    if strength > 98:
+        add_menu_item(menu, name, function,
+                      '/usr/share/icons/hicolor/22x22/apps/nm-signal-100.png')
+    elif strength >= 75:
+        add_menu_item(menu, name, function,
+                      '/usr/share/icons/hicolor/22x22/apps/nm-signal-75.png')
+    elif strength >= 50:
+        add_menu_item(menu, name, function,
+                      '/usr/share/icons/hicolor/22x22/apps/nm-signal-50.png')
+    elif strength >= 25:
+        add_menu_item(menu, name, function,
+                      '/usr/share/icons/hicolor/22x22/apps/nm-signal-25.png')
+    else:
+        add_menu_item(menu, name, function,
+                      '/usr/share/icons/hicolor/22x22/apps/nm-signal-00.png')
+
+
 def choose_profile(*arguments):
     print('choose_profile: '),
     pprint.pprint(arguments)
@@ -49,12 +92,27 @@ def show_menu(widget, event, applet):
         (event.button == 1 or event.button == 3):
         menu = Gtk.Menu()
 
-        profiles = get_profiles()
+        add_menu_label(menu, 'Active Mesh')
 
-        for name, profile in profiles:
-            add_menu_item(menu, name, choose_profile)
-#'/usr/share/icons/hicolor/22x22/apps/nm-adhoc.png'
-        sep0 = Gtk.SeparatorMenuItem(); sep0.show(); menu.add(sep0)
+        actives, visibles, strengths = get_visible_adhocs()
+        profiles = get_profiles()
+        for profile in actives:
+            if profile in profiles:
+                add_menu_item(menu, profile[0], choose_profile,
+                              '/usr/share/icons/hicolor/22x22/apps/nm-adhoc.png')
+
+        sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
+        add_menu_label(menu, 'Available Profiles')
+        for profile in profiles:
+            if profile in actives:
+                continue
+            elif profile in visibles:
+                add_visible_profile_menu_item(menu, profile[0], choose_profile,
+                                              strengths[profile[0]])
+            else:
+                add_menu_item(menu, profile[0], choose_profile)
+
+        sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
         add_menu_item(menu, 'Show Mesh Status', show_mesh_status)
         add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
         sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
