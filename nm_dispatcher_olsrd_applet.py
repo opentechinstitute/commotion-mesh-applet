@@ -40,10 +40,8 @@ def show_menu(widget, event, applet):
                 add_menu_item(menu, m.group(1), choose_profile, present_icon)
         sep0 = Gtk.SeparatorMenuItem(); sep0.show(); menu.add(sep0)
         add_menu_item(menu, 'Show Mesh Status', show_mesh_status)
-        sep1 = Gtk.SeparatorMenuItem(); sep1.show(); menu.add(sep1)
-        add_menu_item(menu, Gtk.STOCK_HELP, show_help)
         add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
-        sep2 = Gtk.SeparatorMenuItem(); sep2.show(); menu.add(sep2)
+        sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
         add_menu_item(menu, Gtk.STOCK_QUIT, do_exit)
         menu.popup( None, None, None, event.button, event.time )
 
@@ -52,11 +50,6 @@ def show_menu(widget, event, applet):
 
 def show_mesh_status(*arguments):
     print('show_mesh_status'),
-    pprint.pprint(arguments)
-
-
-def show_help(*arguments):
-    print('show_help'),
     pprint.pprint(arguments)
 
 
