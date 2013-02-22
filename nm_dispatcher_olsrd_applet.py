@@ -1,9 +1,11 @@
 
 import glob
+import json
 import NetworkManager
 import pyjavaproperties
 import re
 import sys
+import urllib2
 
 import pprint
 
@@ -11,6 +13,24 @@ try:
     from gi.repository import Gtk
 except: # Can't use ImportError, as gi.repository isn't quite that nice...
     import gtk as Gtk
+
+
+class JsonInfo():
+
+    def __init__(self, baseurl='http://localhost:9090'):
+        self.baseurl = baseurl
+        self.jsondecoder = json.JSONDecoder()
+
+    def dump(self, data='/all'):
+        try:
+            return urllib2.urlopen(self.baseurl + data).read()
+        except urllib2.URLError:
+            return None
+
+    def dict(self, data='/all'):
+        dump = self.dump(data)
+        if dump:
+            return self.jsondecoder.decode(dump)
 
 
 def get_visible_adhocs():
@@ -114,6 +134,7 @@ def show_menu(widget, event, applet):
 
         sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
         add_menu_item(menu, 'Show Mesh Status', show_mesh_status)
+        add_menu_item(menu, 'Save Mesh Status To File...', save_mesh_status_to_file)
         add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
         sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
         add_menu_item(menu, Gtk.STOCK_QUIT, do_exit)
@@ -125,6 +146,47 @@ def show_menu(widget, event, applet):
 def show_mesh_status(*arguments):
     print('show_mesh_status'),
     pprint.pprint(arguments)
+
+
+def save_mesh_status_to_file(*arguments):
+    toplevel = arguments[0].get_toplevel()
+    dialog = Gtk.FileChooserDialog("Save Mesh Status to File...",
+                                   toplevel,
+                                   Gtk.FILE_CHOOSER_ACTION_SAVE,
+                                   (Gtk.STOCK_CANCEL, Gtk.RESPONSE_CANCEL,
+                                    Gtk.STOCK_SAVE, Gtk.RESPONSE_OK))
+    dialog.set_default_response(Gtk.RESPONSE_OK)
+    dialog.set_do_overwrite_confirmation(True)
+
+    file_filter = Gtk.FileFilter()
+    file_filter.add_pattern("*.json")
+    file_filter.set_name("JSON (*.json)")
+    dialog.add_filter(file_filter)
+
+    file_filter = Gtk.FileFilter()
+    file_filter.add_pattern("*")
+    file_filter.set_name("All files (*.*)")
+    dialog.add_filter(file_filter)
+
+    response = dialog.run()
+    msg = None
+    if response == Gtk.RESPONSE_OK:
+        filename = dialog.get_filename()
+        if not filename.endswith('.json'):
+            filename += '.json'
+        dump = JsonInfo().dump('/all')
+        if dump:
+            with open(filename, 'w') as f:
+                f.write(dump)
+        else:
+            msg = Gtk.MessageDialog(toplevel,
+                                    Gtk.DIALOG_DESTROY_WITH_PARENT,
+                                    Gtk.MESSAGE_ERROR,
+                                    (Gtk.BUTTONS_CLOSE),
+                                    'Nothing was written because olsrd is not running, there is no active mesh profile!')
+            msg.run()
+            msg.destroy()
+    dialog.destroy()
 
 
 def show_about(*arguments):
