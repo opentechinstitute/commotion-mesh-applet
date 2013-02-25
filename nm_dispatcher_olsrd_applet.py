@@ -2,9 +2,12 @@
 import glob
 import json
 import NetworkManager
+import os
 import pyjavaproperties
 import re
 import sys
+import threading
+import time
 import urllib2
 
 import pprint
@@ -31,6 +34,104 @@ class JsonInfo():
         dump = self.dump(data)
         if dump:
             return self.jsondecoder.decode(dump)
+
+
+class MeshStatus():
+
+    def __init__(self, toplevel):
+        self.toplevel = toplevel
+        self.jsoninfo = JsonInfo()
+        self.imagedir = commotion_mesh_panel_png_dir
+
+    def _set_icon(self, cell, filename):
+        fullfilename = os.path.join(self.imagedir, filename)
+        cell.set_property("pixbuf", Gtk.gdk.pixbuf_new_from_file(fullfilename))
+
+    def _internet_icon(self, column, cell, model, iter):
+        if model[iter][3]:
+            self._set_icon(cell, 'default_route.png')
+
+    def _hna_icon(self, column, cell, model, iter):
+        if model[iter][4]:
+            self._set_icon(cell, 'other_route.png')
+
+    def show(self):
+        window = Gtk.Window()
+        window.set_title('Mesh Status (Links and HNA)')
+        vbox = Gtk.VBox(homogeneous=False, spacing=5)
+        window.add(vbox)
+
+        links_hna = self.jsoninfo.dict('/links/hna')
+        # liststore data:  IP, LQ, NLQ, have_internet, have_HNA
+        liststore = Gtk.ListStore(str, int, int, bool, bool)
+        if links_hna:
+            hna = []
+            internet = []
+            for i in links_hna['hna']:
+                if i['destination'] == '0.0.0.0':
+                    internet.append(i['gateway'])
+                else:
+                    hna.append(i['gateway'])
+            for link in links_hna['links']:
+                ip = link['remoteIP']
+                lqPercent = int(link['linkQuality']*100)
+                nlqPercent = int(link['neighborLinkQuality']*100)
+                cell = [ ip, lqPercent, nlqPercent ]
+                if ip in internet:
+                    cell.append(True)
+                else:
+                    cell.append(False)
+                if ip in hna:
+                    cell.append(True)
+                else:
+                    cell.append(False)
+                liststore.append(cell)
+
+        treeview = Gtk.TreeView(model=liststore)
+        selection = treeview.get_selection()
+        selection.set_mode(Gtk.SELECTION_NONE)
+        vbox.pack_start(treeview, True, True, 3)
+
+        column = Gtk.TreeViewColumn("Link IP Address")
+        column.set_alignment(0.5)
+        treeview.append_column(column)
+        cell = Gtk.CellRendererText()
+        column.pack_start(cell, False)
+        column.add_attribute(cell, "text", 0)
+
+        column = Gtk.TreeViewColumn("LQ")
+        column.set_alignment(0.5)
+        column.set_resizable(True)
+        treeview.append_column(column)
+        cell = Gtk.CellRendererProgress()
+        column.pack_start(cell, True)
+        column.add_attribute(cell, "value", 1)
+
+        column = Gtk.TreeViewColumn("NLQ")
+        column.set_alignment(0.5)
+        column.set_resizable(True)
+        treeview.append_column(column)
+        cell = Gtk.CellRendererProgress()
+        column.pack_start(cell, True)
+        column.add_attribute(cell, "value", 2)
+
+        column = Gtk.TreeViewColumn("HNA?")
+        column.set_alignment(0.5)
+        column.set_resizable(False)
+        treeview.append_column(column)
+        cell = Gtk.CellRendererPixbuf()
+        column.pack_start(cell, False)
+        column.set_cell_data_func(cell, self._hna_icon)
+
+        column = Gtk.TreeViewColumn("Internet?")
+        column.set_alignment(0.5)
+        column.set_resizable(False)
+        treeview.append_column(column)
+        cell = Gtk.CellRendererPixbuf()
+        column.pack_start(cell, False)
+        column.set_cell_data_func(cell, self._internet_icon)
+
+        window.show_all()
 
 
 def get_visible_adhocs():
@@ -144,8 +245,7 @@ def show_menu(widget, event, applet):
 
 
 def show_mesh_status(*arguments):
-    print('show_mesh_status'),
-    pprint.pprint(arguments)
+    MeshStatus(arguments[0].get_toplevel()).show()
 
 
 def save_mesh_status_to_file(*arguments):
@@ -195,7 +295,7 @@ def show_about(*arguments):
     about_dialog.set_program_name('Commotion Mesh Applet')
     about_dialog.set_comments('Commotion is an open-source communication tool that uses mobile phones, computers, and other wireless devices to create decentralized mesh networks.')
     about_dialog.set_website('https://commotionwireless.net/')
-    icon = Gtk.gdk.pixbuf_new_from_file(os.path.join(commotion_mesh_panel_imagedir,
+    icon = Gtk.gdk.pixbuf_new_from_file(os.path.join(commotion_mesh_panel_svg_dir,
                                         'commotion.svg'))
     about_dialog.set_logo(icon)
 
@@ -213,7 +313,7 @@ def do_exit(*arguments):
 def applet_factory(applet, iid, data = None):
     applet.set_background_widget(applet) # /* enable transparency hack */
 
-    icon = Gtk.gdk.pixbuf_new_from_file(os.path.join(commotion_mesh_panel_imagedir,
+    icon = Gtk.gdk.pixbuf_new_from_file(os.path.join(commotion_mesh_panel_svg_dir,
                                                      'commotion-mesh-disconnected.svg'))
     image = Gtk.Image()
     image.set_from_pixbuf(icon.scale_simple(22, 22, Gtk.gdk.INTERP_BILINEAR))
@@ -226,4 +326,5 @@ def applet_factory(applet, iid, data = None):
     print('Factory started')
     return True
 
-commotion_mesh_panel_imagedir = '/usr/share/icons/hicolor/scalable/apps'
+commotion_mesh_panel_svg_dir = '/usr/share/icons/hicolor/scalable/apps'
+commotion_mesh_panel_png_dir = '/usr/share/icons/hicolor/scalable/apps'

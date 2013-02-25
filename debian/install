@@ -9,3 +9,5 @@ nm-dispatcher-olsrd-applet-mate.server usr/lib/matecomponent/servers
 commotion.svg                   usr/share/icons/hicolor/scalable/apps/
 commotion-mesh-connected.svg    usr/share/icons/hicolor/scalable/apps/
 commotion-mesh-disconnected.svg usr/share/icons/hicolor/scalable/apps/
+default_route.png               usr/share/icons/hicolor/32x32/actions/
+other_route.png                 usr/share/icons/hicolor/32x32/actions/
