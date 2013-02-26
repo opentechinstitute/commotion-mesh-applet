@@ -1,7 +1,7 @@
 debian/files
-debian/nm-dispatcher-olsrd-applet.debhelper.log
-debian/nm-dispatcher-olsrd-applet.substvars
-debian/nm-dispatcher-olsrd-applet/
+debian/commotion-mesh-applet.debhelper.log
+debian/commotion-mesh-applet.substvars
+debian/commotion-mesh-applet/
 # python build products
 *.pyc
 # example code
