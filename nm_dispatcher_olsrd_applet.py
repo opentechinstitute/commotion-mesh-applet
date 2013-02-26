@@ -58,6 +58,7 @@ class MeshStatus():
     def show(self):
         window = Gtk.Window()
         window.set_title('Mesh Status (Links and HNA)')
+        window.set_resizable(False)
         vbox = Gtk.VBox(homogeneous=False, spacing=5)
         window.add(vbox)
 
@@ -65,6 +66,7 @@ class MeshStatus():
         # liststore data:  IP, LQ, NLQ, have_internet, have_HNA
         liststore = Gtk.ListStore(str, int, int, bool, bool)
         if links_hna:
+            connected = True
             hna = []
             internet = []
             for i in links_hna['hna']:
@@ -86,6 +88,36 @@ class MeshStatus():
                 else:
                     cell.append(False)
                 liststore.append(cell)
+        else:
+            connected = False
+        myip = link['localIP']
+
+        infobar = Gtk.InfoBar()
+        if connected:
+            infobar.set_message_type(Gtk.MESSAGE_OTHER)
+            label = Gtk.Label('mesh address: ' + myip)
+        else:
+            infobar.set_message_type(Gtk.MESSAGE_ERROR)
+            label = Gtk.Label('Not connected to a mesh!')
+        content = infobar.get_content_area()
+        content.set_homogeneous(False)
+        content.pack_start(label, expand=False)
+        if myip in hna:
+            image = Gtk.Image()
+            image.set_from_file(os.path.join(self.imagedir, 'other_route.png'))
+            content.pack_start(image, expand=False)
+            need_filler = True
+        else:
+            need_filler = False
+        if myip in internet:
+            image = Gtk.Image()
+            image.set_from_file(os.path.join(self.imagedir, 'default_route.png'))
+            # leave empty space so the internet icon is properly aligned
+            if need_filler:
+                content.pack_start(image, expand=False)
+            else:
+                content.pack_end(image, expand=False)
+        vbox.pack_start(infobar, False)
 
         treeview = Gtk.TreeView(model=liststore)
         selection = treeview.get_selection()
