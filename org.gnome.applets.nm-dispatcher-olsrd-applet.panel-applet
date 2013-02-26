@@ -1,10 +1,10 @@
 [Applet Factory]
-Id=nm-dispatcher-olsrd-appletFactory
-Location=/usr/lib/gnome-applets/nm-dispatcher-olsrd-applet-factory3.py
-Name=nm-dispatcher-olsrd-applet Factory
+Id=commotion-mesh-appletFactory
+Location=/usr/lib/gnome-applets/commotion-mesh-applet-factory3.py
+Name=commotion-mesh-applet Factory
 
-[nm-dispatcher-olsrd-applet]
-Name=nm-dispatcher-olsrd-applet
+[commotion-mesh-applet]
+Name=commotion-mesh-applet
 Description=represent the state of an olsrd mesh connection
 Icon=time-admin.png
-BonoboId=OAFIID:nm-dispatcher-olsrd-appletFactory
+BonoboId=OAFIID:commotion-mesh-appletFactory

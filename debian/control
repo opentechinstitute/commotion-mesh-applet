@@ -1,4 +1,4 @@
-Source: nm-dispatcher-olsrd-applet
+Source: commotion-mesh-applet
 Section: gnome
 Priority: extra
 Maintainer: Hans-Christoph Steiner <hans@eds.org>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.4
 #Homepage: <insert the upstream URL, if relevant>
 
-Package: nm-dispatcher-olsrd-applet
+Package: commotion-mesh-applet
 Architecture: any
 Depends: nm-dispatcher-olsrd,
          ${shlibs:Depends},

@@ -5,7 +5,7 @@ import gtk
 import pygtk
 pygtk.require('2.0')
 import gnomeapplet
-from nm_dispatcher_olsrd_applet import applet_factory
+from commotion_mesh_applet import applet_factory
 
 if __name__ == '__main__':	 # testing for execution
 	print('Starting factory')
@@ -21,8 +21,8 @@ if __name__ == '__main__':	 # testing for execution
 		gtk.main()
 		sys.exit()
 	else:
-		gnomeapplet.bonobo_factory('OAFIID:nm-dispatcher-olsrd-applet_Factory',
+		gnomeapplet.bonobo_factory('OAFIID:commotion-mesh-applet_Factory',
 				gnomeapplet.Applet.__gtype__,
-				'nm-dispatcher-olsrd-applet',
+				'commotion-mesh-applet',
 				'0.0',
 				applet_factory)

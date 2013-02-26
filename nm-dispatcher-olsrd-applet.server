@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 
 <oaf_info>
-	<oaf_server iid="OAFIID:nm-dispatcher-olsrd-applet_Factory"
+	<oaf_server iid="OAFIID:commotion-mesh-applet_Factory"
 		type="exe"
-		location="/usr/lib/gnome-applets/nm-dispatcher-olsrd-applet-factory2.py">
+		location="/usr/lib/gnome-applets/commotion-mesh-applet-factory2.py">
         <oaf_attribute name="repo_ids" type="stringv">
                 <item value="IDL:Bonobo/GenericFactory:1.0"/>
                 <item value="IDL:Bonobo/Unknown:1.0"/>
         </oaf_attribute>
-        <oaf_attribute name="name" type="string" value="nm-dispatcher-olsrd-applet"/>
+        <oaf_attribute name="name" type="string" value="Commotion Mesh Applet"/>
         <oaf_attribute name="description" type="string" value="represent the state of an olsrd mesh connection"/>
   </oaf_server>
-	<oaf_server iid="OAFIID:nm-dispatcher-olsrd-applet"
+	<oaf_server iid="OAFIID:commotion-mesh-applet"
 				type="factory"
-				location="OAFIID:nm-dispatcher-olsrd-applet_Factory">
+				location="OAFIID:commotion-mesh-applet_Factory">
 
 			<oaf_attribute name="repo_ids" type="stringv">
 					<item value="IDL:GNOME/Vertigo/PanelAppletShell:1.0"/>
 					<item value="IDL:Bonobo/Control:1.0"/>
 					<item value="IDL:Bonobo/Unknown:1.0"/>
 			</oaf_attribute>
-			<oaf_attribute name="name" type="string" value="nm-dispatcher-olsrd-applet"/>
+			<oaf_attribute name="name" type="string" value="Commotion Mesh Applet"/>
 			<oaf_attribute name="description" type="string" value="represent the state of an olsrd mesh connection"/>
 			<oaf_attribute name="panel:category" type="string" value="System"/>
 			<oaf_attribute name="panel:icon" type="string" value="commotion-mesh-connected.svg"/>

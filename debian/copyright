@@ -1,7 +1,7 @@
 Format: http://dep.debian.net/deps/dep5
-Upstream-Name: nm-dispatcher-olsrd-applet
+Upstream-Name: commotion-mesh-applet
 Upstream-Contact: Hans-Christoph Steiner <hans@eds.org>
-Source: https://github.com/eighthave/nm-dispatcher-olsrd-applet/
+Source: https://github.com/eighthave/commotion-mesh-applet/
 
 Files: *
 Copyright: 2013, Hans-Christoph Steiner

@@ -3,7 +3,7 @@
 import sys
 from gi.repository import Gtk
 from gi.repository import PanelApplet
-from nm_dispatcher_olsrd_applet import applet_factory
+from commotion_mesh_applet import applet_factory
 
 if __name__ == '__main__':	# testing for execution
 	print('Starting factory')
@@ -17,7 +17,7 @@ if __name__ == '__main__':	# testing for execution
 		Gtk.main()
 		sys.exit()
 	else:
-		PanelApplet.Applet.factory_main("nm-dispatcher-olsrd-appletFactory",
+		PanelApplet.Applet.factory_main("commotion-mesh-appletFactory",
 				PanelApplet.Applet.__gtype__,
 				applet_factory,
 				None)

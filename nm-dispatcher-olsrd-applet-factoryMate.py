@@ -5,7 +5,7 @@ import gtk
 import pygtk
 pygtk.require('2.0')
 import mateapplet
-from nm_dispatcher_olsrd_applet import applet_factory
+from commotion_mesh_applet import applet_factory
 
 if __name__ == '__main__':	 # testing for execution
 	print('Starting factory')
@@ -21,8 +21,8 @@ if __name__ == '__main__':	 # testing for execution
 		gtk.main()
 		sys.exit()
 	else:
-		mateapplet.matecomponent_factory('OAFIID:MATE_nm-dispatcher-olsrd-applet_Factory',
+		mateapplet.matecomponent_factory('OAFIID:MATE_commotion-mesh-applet_Factory',
 				mateapplet.Applet.__gtype__,
-				'MATE_nm-dispatcher-olsrd-applet',
+				'MATE_commotion-mesh-applet',
 				'0.0',
 				applet_factory)
