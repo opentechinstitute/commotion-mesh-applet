@@ -267,6 +267,7 @@ def show_menu(widget, event, applet):
 
         sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
         add_menu_item(menu, 'Show Mesh Status', show_mesh_status)
+        add_menu_item(menu, 'Show Debug Log', show_debug_log)
         add_menu_item(menu, 'Save Mesh Status To File...', save_mesh_status_to_file)
         add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
         sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
@@ -278,6 +279,10 @@ def show_menu(widget, event, applet):
 
 def show_mesh_status(*arguments):
     MeshStatus(arguments[0].get_toplevel()).show()
+
+
+def show_debug_log(*arguments):
+    os.system('xdg-open /tmp/nm-dispatcher-olsrd.log &')
 
 
 def save_mesh_status_to_file(*arguments):
