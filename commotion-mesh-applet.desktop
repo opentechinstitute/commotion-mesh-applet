@@ -1,0 +1,7 @@
+[Xfce Panel]
+Type=X-XFCE-PanelPlugin
+Name=Commotion Mesh Applet
+Comment=Volume control for your sound card
+Icon=commotion-mesh-disconnected
+X-XFCE-Exec=/usr/lib/gnome-applets/commotion-mesh-applet-factory2.py
+X-XFCE-Unique=true
