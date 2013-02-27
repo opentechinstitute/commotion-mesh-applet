@@ -199,6 +199,16 @@ def get_profiles():
     return tuple(profiles)
 
 
+def add_menu_about(menu):
+    add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
+
+
+def add_menu_separator(menu):
+    sep = Gtk.SeparatorMenuItem()
+    sep.show()
+    menu.add(sep)
+
+
 def add_menu_item(menu, name, function, imagefile=None):
     item = Gtk.ImageMenuItem(name)
     if imagefile:
@@ -255,7 +265,7 @@ def show_menu(widget, event, applet):
                 add_menu_item(menu, profile[0], choose_profile,
                               '/usr/share/icons/hicolor/22x22/apps/nm-adhoc.png')
 
-        sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
+        add_menu_separator(menu)
         add_menu_label(menu, 'Available Profiles')
         for profile in profiles:
             if profile in actives:
@@ -266,15 +276,14 @@ def show_menu(widget, event, applet):
             else:
                 add_menu_item(menu, profile[0], choose_profile)
 
-        sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
+        add_menu_separator(menu)
         add_menu_item(menu, 'Show Mesh Status', show_mesh_status)
         add_menu_item(menu, 'Show Debug Log', show_debug_log)
         add_menu_item(menu, 'Save Mesh Status To File...', save_mesh_status_to_file)
-        add_menu_item(menu, Gtk.STOCK_ABOUT, show_about)
-        sep = Gtk.SeparatorMenuItem(); sep.show(); menu.add(sep)
-        add_menu_item(menu, Gtk.STOCK_QUIT, do_exit)
-        menu.popup( None, None, None, event.button, event.time )
+        add_menu_separator(menu)
+        add_menu_about(menu)
 
+        menu.popup( None, None, None, event.button, event.time )
         widget.emit_stop_by_name("button_press_event")
 
 
