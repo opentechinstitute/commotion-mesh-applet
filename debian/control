@@ -7,7 +7,7 @@ Standards-Version: 3.9.4
 #Homepage: <insert the upstream URL, if relevant>
 
 Package: commotion-mesh-applet
-Architecture: any
+Architecture: all
 Depends: nm-dispatcher-olsrd,
          ${shlibs:Depends},
          ${misc:Depends},
