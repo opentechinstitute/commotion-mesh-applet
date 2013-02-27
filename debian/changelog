@@ -1,5 +1,5 @@
-commotion-mesh-applet (0.0-1) unstable; urgency=low
+commotion-mesh-applet (0.0.20130226-1) unstable; urgency=low
 
   * Initial release
 
- -- Hans-Christoph Steiner <hans@eds.org>  Thu, 14 Feb 2013 21:17:07 +0000
+ -- Hans-Christoph Steiner <hans@eds.org>  Tue, 26 Feb 2013 22:41:15 -0500
