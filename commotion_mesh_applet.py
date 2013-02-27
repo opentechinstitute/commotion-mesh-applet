@@ -252,8 +252,7 @@ def choose_profile(*arguments):
 
 
 def show_menu(widget, event, applet):
-    if event.type == Gtk.gdk.BUTTON_PRESS and \
-        (event.button == 1 or event.button == 3):
+    if event.type == Gtk.gdk.BUTTON_PRESS and event.button == 1:
         menu = Gtk.Menu()
 
         add_menu_label(menu, 'Active Mesh')
