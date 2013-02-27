@@ -358,8 +358,6 @@ def do_exit(*arguments):
 
 
 def applet_factory(applet, iid, data = None):
-    applet.set_background_widget(applet) # /* enable transparency hack */
-
     icon = Gtk.gdk.pixbuf_new_from_file(os.path.join(commotion_mesh_panel_svg_dir,
                                                      'commotion-mesh-disconnected.svg'))
     image = Gtk.Image()
