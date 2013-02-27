@@ -3,6 +3,7 @@ org.gnome.panel.applet.commotion-mesh-applet.service usr/share/dbus-1/services/
 commotion-mesh-applet-factory2.py usr/lib/gnome-applets
 commotion-mesh-applet-factory3.py usr/lib/gnome-applets
 commotion_mesh_applet.py usr/lib/gnome-applets
+commotion.py                       usr/lib/gnome-applets
 commotion-mesh-applet.server usr/lib/bonobo/servers
 commotion-mesh-applet-factoryMate.py /usr/lib/mate-applets
 commotion-mesh-applet-mate.server usr/lib/matecomponent/servers
