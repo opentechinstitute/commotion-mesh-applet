@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Hans-Christoph Steiner <hans@eds.org>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.4
-#Homepage: <insert the upstream URL, if relevant>
+Homepage: https://commotionwireless.net/
 
 Package: commotion-mesh-applet
 Architecture: all
