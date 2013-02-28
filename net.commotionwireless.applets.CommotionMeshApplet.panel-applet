@@ -4,7 +4,7 @@ Location=/usr/lib/gnome-applets/commotion-mesh-applet-factory3.py
 Name=commotion-mesh-applet Factory
 
 [commotion-mesh-applet]
-Name=commotion-mesh-applet
+Name=Commotion Mesh Applet
 Description=represent the state of an olsrd mesh connection
-Icon=time-admin.png
+Icon=/usr/share/icons/hicolor/scalable/apps/commotion.svg
 BonoboId=OAFIID:commotion-mesh-appletFactory
