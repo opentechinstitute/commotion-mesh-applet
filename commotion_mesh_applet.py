@@ -107,37 +107,42 @@ class CommotionMeshApplet():
 
     def show_menu(self, widget, event, applet):
         if event.type == Gtk.gdk.BUTTON_PRESS and event.button == 1:
-            self.menu = Gtk.Menu()
-
-            self.add_menu_label('Active Mesh')
-
-            actives, visibles, strengths = self.get_visible_adhocs()
-            profiles = self.get_profiles()
-            for profile in actives:
-                if profile in profiles:
-                    self.add_menu_item(profile[0], self.choose_profile,
-                                       os.path.join(self.nm_icon_dir, 'nm-adhoc.png'))
-
-            self.add_menu_separator()
-            self.add_menu_label('Available Profiles')
-            for profile in profiles:
-                if profile in actives:
-                    continue
-                elif profile in visibles:
-                    self.add_visible_profile_menu_item(profile[0], self.choose_profile,
-                                                       strengths[profile[0]])
-                else:
-                    self.add_menu_item(profile[0], self.choose_profile)
-
-            self.add_menu_separator()
-            self.add_menu_item('Show Mesh Status', self.show_mesh_status)
-            self.add_menu_item('Show Debug Log', self.show_debug_log)
-            self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
-            self.add_menu_separator()
-            self.add_menu_about()
-
+            self.create_menu()
             self.menu.popup( None, None, None, event.button, event.time )
             widget.emit_stop_by_name("button_press_event")
+
+
+    def create_menu(self):
+        self.menu = Gtk.Menu()
+
+        self.add_menu_label('Active Mesh')
+
+        actives, visibles, strengths = self.get_visible_adhocs()
+        profiles = self.get_profiles()
+        for profile in actives:
+            if profile in profiles:
+                self.add_menu_item(profile[0], self.choose_profile,
+                                   os.path.join(self.nm_icon_dir, 'nm-adhoc.png'))
+
+        self.add_menu_separator()
+        self.add_menu_label('Available Profiles')
+        for profile in profiles:
+            if profile in actives:
+                continue
+            elif profile in visibles:
+                self.add_visible_profile_menu_item(profile[0], self.choose_profile,
+                                                   strengths[profile[0]])
+            else:
+                self.add_menu_item(profile[0], self.choose_profile)
+
+        self.add_menu_separator()
+        self.add_menu_item('Show Mesh Status', self.show_mesh_status)
+        self.add_menu_item('Show Debug Log', self.show_debug_log)
+        self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
+        self.add_menu_separator()
+        self.add_menu_about()
+
+        return self.menu
 
 
     def show_mesh_status(self, *arguments):
