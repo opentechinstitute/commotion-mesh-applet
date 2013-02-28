@@ -1,0 +1,12 @@
+
+[Desktop Entry]
+Encoding=UTF-8
+Name=Commotion Mesh Applet
+Description=represent the state of an olsrd mesh connection
+Icon=/usr/share/icons/hicolor/scalable/apps/commotion.svg
+Exec=/usr/lib/gnome-applets/commotion-mesh-applet
+Terminal=false
+Type=Application
+StartupNotify=false
+NoDisplay=true
+Categories=System;Monitor;GTK;

@@ -1,4 +1,5 @@
 net.commotionwireless.panel.applet.commotion-mesh-applet.service usr/share/dbus-1/services/
+commotion-mesh-applet.desktop   etc/xdg/autostart/
 commotion-mesh-applet-factory2.py  usr/lib/gnome-applets
 commotion-mesh-applet              usr/lib/gnome-applets
 commotion_mesh_applet.py           usr/lib/gnome-applets
