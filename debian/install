@@ -8,7 +8,7 @@ commotion.py                       usr/lib/gnome-applets
 commotion-mesh-applet.server usr/lib/bonobo/servers
 commotion-mesh-applet-factoryMate.py /usr/lib/mate-applets
 commotion-mesh-applet-mate.server usr/lib/matecomponent/servers
-commotion-mesh-applet.desktop   usr/share/xfce4/panel-plugins/
+xfce4/commotion-mesh-applet.desktop   usr/share/xfce4/panel-plugins/
 commotion.svg                   usr/share/icons/hicolor/scalable/apps/
 commotion-mesh-connected.svg    usr/share/icons/hicolor/scalable/apps/
 commotion-mesh-disconnected.svg usr/share/icons/hicolor/scalable/apps/
