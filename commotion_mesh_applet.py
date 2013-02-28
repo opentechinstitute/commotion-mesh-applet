@@ -16,10 +16,32 @@ except: # Can't use ImportError, as gi.repository isn't quite that nice...
     import gtk as Gtk
 
 
+class PortingHacks():
+    '''
+    This is a collection of things that are quite similar across GTK versions,
+    but not named the same.  The setup code for each GTK version should set
+    these.
+    '''
+
+    BUTTONS_CLOSE = None
+    DIALOG_DESTROY_WITH_PARENT = None
+    MESSAGE_ERROR = None
+    MESSAGE_OTHER = None
+    FILE_CHOOSER_ACTION_SAVE = None
+    RESPONSE_CANCEL = None
+    RESPONSE_OK = None
+    SELECTION_NONE = None
+    pixbuf_new_from_file = None
+
+
 class CommotionMeshApplet():
 
     svg_dir = '/usr/share/icons/hicolor/scalable/apps'
     nm_icon_dir = '/usr/share/icons/hicolor/22x22/apps'
+
+    def __init__(self, portinghacks=None):
+        self.port = portinghacks
+
 
     def get_visible_adhocs(self):
         actives = []
@@ -146,7 +168,7 @@ class CommotionMeshApplet():
 
 
     def show_mesh_status(self, *arguments):
-        MeshStatus(arguments[0].get_toplevel()).show()
+        MeshStatus(arguments[0].get_toplevel(), self.port).show()
 
 
     def show_debug_log(self, *arguments):
@@ -157,10 +179,10 @@ class CommotionMeshApplet():
         toplevel = arguments[0].get_toplevel()
         dialog = Gtk.FileChooserDialog("Save Mesh Status to File...",
                                        toplevel,
-                                       Gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (Gtk.STOCK_CANCEL, Gtk.RESPONSE_CANCEL,
-                                        Gtk.STOCK_SAVE, Gtk.RESPONSE_OK))
-        dialog.set_default_response(Gtk.RESPONSE_OK)
+                                       self.port.FILE_CHOOSER_ACTION_SAVE,
+                                       (Gtk.STOCK_CANCEL, self.port.RESPONSE_CANCEL,
+                                        Gtk.STOCK_SAVE, self.port.RESPONSE_OK))
+        dialog.set_default_response(self.port.RESPONSE_OK)
         dialog.set_do_overwrite_confirmation(True)
 
         file_filter = Gtk.FileFilter()
@@ -175,7 +197,7 @@ class CommotionMeshApplet():
 
         response = dialog.run()
         msg = None
-        if response == Gtk.RESPONSE_OK:
+        if response == self.port.RESPONSE_OK:
             filename = dialog.get_filename()
             if not filename.endswith('.json'):
                 filename += '.json'
@@ -185,8 +207,8 @@ class CommotionMeshApplet():
                     f.write(dump)
             else:
                 msg = Gtk.MessageDialog(toplevel,
-                                        Gtk.DIALOG_DESTROY_WITH_PARENT,
-                                        Gtk.MESSAGE_ERROR,
+                                        self.port.DIALOG_DESTROY_WITH_PARENT,
+                                        self.port.MESSAGE_ERROR,
                                         (Gtk.BUTTONS_CLOSE),
                                         'Nothing was written because olsrd is not running, there is no active mesh profile!')
                 msg.run()
@@ -200,8 +222,8 @@ class CommotionMeshApplet():
         about_dialog.set_program_name('Commotion Mesh Applet')
         about_dialog.set_comments('Commotion is an open-source communication tool that uses mobile phones, computers, and other wireless devices to create decentralized mesh networks.')
         about_dialog.set_website('https://commotionwireless.net/')
-        icon = Gtk.gdk.pixbuf_new_from_file(os.path.join(self.svg_dir,
-                                                         'commotion.svg'))
+        icon = self.port.pixbuf_new_from_file(os.path.join(self.svg_dir,
+                                                           'commotion.svg'))
         about_dialog.set_logo(icon)
 
         def close(dialog, response, editor):
@@ -216,8 +238,20 @@ class CommotionMeshApplet():
 
 
     def setup_gtk2_applet(self, applet):
-        icon = Gtk.gdk.pixbuf_new_from_file(os.path.join(self.svg_dir,
-                                                         'commotion-mesh-disconnected.svg'))
+        # set GTK2-specific versions of things
+        self.port = PortingHacks()
+        self.port.BUTTONS_CLOSE = Gtk.BUTTONS_CLOSE
+        self.port.FILE_CHOOSER_ACTION_SAVE = Gtk.FILE_CHOOSER_ACTION_SAVE
+        self.port.MESSAGE_ERROR = Gtk.MESSAGE_ERROR
+        self.port.MESSAGE_OTHER = Gtk.MESSAGE_OTHER
+        self.port.RESPONSE_CANCEL = Gtk.RESPONSE_CANCEL
+        self.port.RESPONSE_OK = Gtk.RESPONSE_OK
+        self.port.DIALOG_DESTROY_WITH_PARENT = Gtk.DIALOG_DESTROY_WITH_PARENT
+        self.port.SELECTION_NONE = Gtk.SELECTION_NONE
+        self.port.pixbuf_new_from_file = Gtk.gdk.pixbuf_new_from_file
+
+        icon = self.port.pixbuf_new_from_file(os.path.join(self.svg_dir,
+                                                           'commotion-mesh-disconnected.svg'))
         image = Gtk.Image()
         image.set_from_pixbuf(icon.scale_simple(22, 22, Gtk.gdk.INTERP_BILINEAR))
         button = Gtk.Button()

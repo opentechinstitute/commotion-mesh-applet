@@ -29,20 +29,21 @@ class JsonInfo():
 
 class MeshStatus():
 
-    def __init__(self, toplevel):
+    def __init__(self, toplevel, portinghacks):
+        self.port = portinghacks
         self.toplevel = toplevel
         self.jsoninfo = JsonInfo()
         self.imagedir = '/usr/share/icons/hicolor/32x32/actions'
 
     def _set_icon(self, cell, filename):
         fullfilename = os.path.join(self.imagedir, filename)
-        cell.set_property("pixbuf", Gtk.gdk.pixbuf_new_from_file(fullfilename))
+        cell.set_property("pixbuf", self.port.pixbuf_new_from_file(fullfilename))
 
-    def _internet_icon(self, column, cell, model, iter):
+    def _internet_icon(self, column, cell, model, iter, destroy=None):
         if model[iter][3]:
             self._set_icon(cell, 'default_route.png')
 
-    def _hna_icon(self, column, cell, model, iter):
+    def _hna_icon(self, column, cell, model, iter, destroy=None):
         if model[iter][4]:
             self._set_icon(cell, 'other_route.png')
 
@@ -88,18 +89,18 @@ class MeshStatus():
 
         infobar = Gtk.InfoBar()
         if connected:
-            infobar.set_message_type(Gtk.MESSAGE_OTHER)
+            infobar.set_message_type(self.port.MESSAGE_OTHER)
             label = Gtk.Label('mesh address: ' + myip)
         else:
-            infobar.set_message_type(Gtk.MESSAGE_ERROR)
+            infobar.set_message_type(self.port.MESSAGE_ERROR)
             label = Gtk.Label('Not connected to a mesh!')
         content = infobar.get_content_area()
         content.set_homogeneous(False)
-        content.pack_start(label, expand=False)
+        content.pack_start(label, False, True, 0)
         if myip in hna:
             image = Gtk.Image()
             image.set_from_file(os.path.join(self.imagedir, 'other_route.png'))
-            content.pack_start(image, expand=False)
+            content.pack_start(image, False, True, 0)
             need_filler = True
         else:
             need_filler = False
@@ -108,14 +109,14 @@ class MeshStatus():
             image.set_from_file(os.path.join(self.imagedir, 'default_route.png'))
             # leave empty space so the internet icon is properly aligned
             if need_filler:
-                content.pack_start(image, expand=False)
+                content.pack_start(image, False, True, 0)
             else:
-                content.pack_end(image, expand=False)
-        vbox.pack_start(infobar, False)
+                content.pack_end(image, False, True, 0)
+        vbox.pack_start(infobar, False, True, 0)
 
         treeview = Gtk.TreeView(model=liststore)
         selection = treeview.get_selection()
-        selection.set_mode(Gtk.SELECTION_NONE)
+        selection.set_mode(self.port.SELECTION_NONE)
         vbox.pack_start(treeview, True, True, 3)
 
         column = Gtk.TreeViewColumn("Link IP Address")
