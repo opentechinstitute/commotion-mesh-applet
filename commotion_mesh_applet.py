@@ -31,6 +31,7 @@ class PortingHacks():
     RESPONSE_CANCEL = None
     RESPONSE_OK = None
     SELECTION_NONE = None
+    STOCK_ABOUT = None
     pixbuf_new_from_file = None
 
 
@@ -77,7 +78,11 @@ class CommotionMeshApplet():
 
 
     def add_menu_about(self):
-        self.add_menu_item(Gtk.STOCK_ABOUT, self.show_about)
+        self.add_menu_item(self.port.STOCK_ABOUT, self.show_about)
+
+
+    def add_menu_gtk2_quit(self):
+        self.add_menu_item(Gtk.STOCK_QUIT, self.do_exit)
 
 
     def add_menu_separator(self):
@@ -262,6 +267,7 @@ def applet_factory(applet, iid, data = None):
     port.RESPONSE_OK = Gtk.RESPONSE_OK
     port.DIALOG_DESTROY_WITH_PARENT = Gtk.DIALOG_DESTROY_WITH_PARENT
     port.SELECTION_NONE = Gtk.SELECTION_NONE
+    port.STOCK_ABOUT = Gtk.STOCK_ABOUT
     port.pixbuf_new_from_file = Gtk.gdk.pixbuf_new_from_file
     cma = CommotionMeshApplet(port)
     cma.setup_gtk2_applet(applet)
