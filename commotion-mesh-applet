@@ -1,0 +1,33 @@
+#!/usr/bin/python
+
+from gi.repository import Gtk, GdkPixbuf
+from gi.repository import AppIndicator3 as appindicator
+from commotion_mesh_applet import CommotionMeshApplet, PortingHacks
+import sys
+
+if __name__ == "__main__":
+    ind = appindicator.Indicator.new(
+        "commotion-mesh-panel",
+        "commotion-mesh-disconnected",
+        appindicator.IndicatorCategory.HARDWARE)
+    ind.set_status(appindicator.IndicatorStatus.ACTIVE)
+    ind.set_attention_icon("commotion-mesh-connected")
+
+# set GTK3/Indictator specific versions of things
+    port = PortingHacks()
+    port.pixbuf_new_from_file = GdkPixbuf.Pixbuf.new_from_file
+    port.BUTTONS_CLOSE = Gtk.ButtonsType.CLOSE
+    port.DIALOG_DESTROY_WITH_PARENT = Gtk.DialogFlags.DESTROY_WITH_PARENT
+    port.MESSAGE_OTHER = Gtk.MessageType.ERROR
+    port.MESSAGE_OTHER = Gtk.MessageType.OTHER
+    port.RESPONSE_OK = Gtk.ResponseType.OK
+    port.RESPONSE_CANCEL = Gtk.ResponseType.CANCEL
+    port.SELECTION_NONE = Gtk.SelectionMode.NONE
+    port.FILE_CHOOSER_ACTION_SAVE = Gtk.FileChooserAction.SAVE
+    port.STOCK_ABOUT = "About"
+
+    cma = CommotionMeshApplet(port)
+    cma.create_menu()
+    cma.add_menu_item("Quit", sys.exit)
+    ind.set_menu(cma.menu)
+    Gtk.main()

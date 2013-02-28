@@ -14,6 +14,7 @@ Depends: nm-dispatcher-olsrd,
          python,
          gir1.2-gtk-3.0 | python-gtk2,
          gir1.2-panelapplet-4.0 | python-gnomeapplet | libmatepanelapplet,
+         gir1.2-appindicator3-0.1 | gir1.2-appindicator-0.1 | python-appindicator,
          gnome-icon-theme | mate-icon-theme,
          gnome-panel | mate-panel
 Recommends: network-manager-gnome
