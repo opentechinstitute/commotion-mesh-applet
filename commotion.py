@@ -29,9 +29,8 @@ class JsonInfo():
 
 class MeshStatus():
 
-    def __init__(self, toplevel, portinghacks):
+    def __init__(self, portinghacks):
         self.port = portinghacks
-        self.toplevel = toplevel
         self.jsoninfo = JsonInfo()
         self.imagedir = '/usr/share/icons/hicolor/32x32/actions'
 

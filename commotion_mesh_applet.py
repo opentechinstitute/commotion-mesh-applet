@@ -39,8 +39,9 @@ class CommotionMeshApplet():
     svg_dir = '/usr/share/icons/hicolor/scalable/apps'
     nm_icon_dir = '/usr/share/icons/hicolor/22x22/apps'
 
-    def __init__(self, portinghacks=None):
+    def __init__(self, portinghacks):
         self.port = portinghacks
+        self.meshstatus = MeshStatus(portinghacks)
 
 
     def get_visible_adhocs(self):
@@ -168,7 +169,7 @@ class CommotionMeshApplet():
 
 
     def show_mesh_status(self, *arguments):
-        MeshStatus(arguments[0].get_toplevel(), self.port).show()
+        self.meshstatus.show()
 
 
     def show_debug_log(self, *arguments):
@@ -201,7 +202,7 @@ class CommotionMeshApplet():
             filename = dialog.get_filename()
             if not filename.endswith('.json'):
                 filename += '.json'
-            dump = MeshStatus(None).dump()
+            dump = self.meshstatus.dump()
             if dump:
                 with open(filename, 'w') as f:
                     f.write(dump)
@@ -238,18 +239,6 @@ class CommotionMeshApplet():
 
 
     def setup_gtk2_applet(self, applet):
-        # set GTK2-specific versions of things
-        self.port = PortingHacks()
-        self.port.BUTTONS_CLOSE = Gtk.BUTTONS_CLOSE
-        self.port.FILE_CHOOSER_ACTION_SAVE = Gtk.FILE_CHOOSER_ACTION_SAVE
-        self.port.MESSAGE_ERROR = Gtk.MESSAGE_ERROR
-        self.port.MESSAGE_OTHER = Gtk.MESSAGE_OTHER
-        self.port.RESPONSE_CANCEL = Gtk.RESPONSE_CANCEL
-        self.port.RESPONSE_OK = Gtk.RESPONSE_OK
-        self.port.DIALOG_DESTROY_WITH_PARENT = Gtk.DIALOG_DESTROY_WITH_PARENT
-        self.port.SELECTION_NONE = Gtk.SELECTION_NONE
-        self.port.pixbuf_new_from_file = Gtk.gdk.pixbuf_new_from_file
-
         icon = self.port.pixbuf_new_from_file(os.path.join(self.svg_dir,
                                                            'commotion-mesh-disconnected.svg'))
         image = Gtk.Image()
@@ -263,7 +252,18 @@ class CommotionMeshApplet():
 
 
 def applet_factory(applet, iid, data = None):
-    cma = CommotionMeshApplet()
+    # set GTK2-specific versions of things
+    port = PortingHacks()
+    port.BUTTONS_CLOSE = Gtk.BUTTONS_CLOSE
+    port.FILE_CHOOSER_ACTION_SAVE = Gtk.FILE_CHOOSER_ACTION_SAVE
+    port.MESSAGE_ERROR = Gtk.MESSAGE_ERROR
+    port.MESSAGE_OTHER = Gtk.MESSAGE_OTHER
+    port.RESPONSE_CANCEL = Gtk.RESPONSE_CANCEL
+    port.RESPONSE_OK = Gtk.RESPONSE_OK
+    port.DIALOG_DESTROY_WITH_PARENT = Gtk.DIALOG_DESTROY_WITH_PARENT
+    port.SELECTION_NONE = Gtk.SELECTION_NONE
+    port.pixbuf_new_from_file = Gtk.gdk.pixbuf_new_from_file
+    cma = CommotionMeshApplet(port)
     cma.setup_gtk2_applet(applet)
     print('Factory started')
     return True
