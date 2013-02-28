@@ -1,5 +1,5 @@
-org.gnome.applets.commotion-mesh-applet.panel-applet usr/share/gnome-panel/4.0/applets/
-org.gnome.panel.applet.commotion-mesh-applet.service usr/share/dbus-1/services/
+net.commotionwireless.applets.CommotionMeshApplet.panel-applet usr/share/gnome-panel/4.0/applets/
+net.commotionwireless.panel.applet.commotion-mesh-applet.service usr/share/dbus-1/services/
 commotion-mesh-applet-factory2.py  usr/lib/gnome-applets
 commotion-mesh-applet-factory3.py  usr/lib/gnome-applets
 commotion-mesh-applet              usr/lib/gnome-applets
