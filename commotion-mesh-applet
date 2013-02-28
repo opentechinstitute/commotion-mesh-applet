@@ -2,7 +2,7 @@
 
 from gi.repository import Gtk, GdkPixbuf
 from gi.repository import AppIndicator3 as appindicator
-from commotion_mesh_applet import CommotionMeshApplet, PortingHacks
+from commotion_applet_support import CommotionMeshApplet, PortingHacks
 import sys
 
 if __name__ == "__main__":

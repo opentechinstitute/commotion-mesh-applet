@@ -5,7 +5,7 @@ import gtk
 import pygtk
 pygtk.require('2.0')
 import gnomeapplet
-from commotion_mesh_applet import applet_factory
+from commotion_applet_support import applet_factory
 
 if __name__ == '__main__':       # testing for execution
     print('Starting factory')

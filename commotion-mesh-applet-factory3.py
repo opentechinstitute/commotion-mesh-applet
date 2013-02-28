@@ -3,7 +3,7 @@
 import sys
 from gi.repository import Gtk
 from gi.repository import PanelApplet
-from commotion_mesh_applet import applet_factory
+from commotion_applet_support import applet_factory
 
 if __name__ == '__main__':      # testing for execution
     print('Starting factory')
