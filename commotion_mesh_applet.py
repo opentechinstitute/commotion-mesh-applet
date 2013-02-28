@@ -151,8 +151,10 @@ class CommotionMeshApplet():
             if profile in profiles:
                 self.add_menu_item(profile[0], self.choose_profile,
                                    os.path.join(self.nm_icon_dir, 'nm-adhoc.png'))
+                self.add_menu_label('BSSID: ' + profile[1])
+                self.add_menu_label('Channel: ' + str(profile[2]))
+                self.add_menu_separator()
 
-        self.add_menu_separator()
         self.add_menu_label('Available Profiles')
         for profile in profiles:
             if profile in actives:
