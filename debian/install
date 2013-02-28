@@ -2,10 +2,10 @@ net.commotionwireless.panel.applet.commotion-mesh-applet.service usr/share/dbus-
 commotion-mesh-applet.desktop   etc/xdg/autostart/
 commotion-mesh-applet-factory2.py  usr/lib/gnome-applets
 commotion-mesh-applet              usr/lib/gnome-applets
-commotion_applet_support.py           usr/lib/gnome-applets
 commotion-mesh-applet.server usr/lib/bonobo/servers
 commotion-mesh-applet-factoryMate.py /usr/lib/mate-applets
 commotion-mesh-applet-mate.server usr/lib/matecomponent/servers
+commotion_applet_support.py    usr/share/pyshared/
 xfce4/commotion-mesh-applet.desktop   usr/share/xfce4/panel-plugins/
 commotion.svg                   usr/share/icons/hicolor/scalable/apps/
 commotion-mesh-connected.svg    usr/share/icons/hicolor/scalable/apps/
