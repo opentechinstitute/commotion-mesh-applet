@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import dbus.mainloop.glib ; dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 import glob
 import json
 import NetworkManager
@@ -194,7 +195,13 @@ class CommotionMeshApplet():
     def __init__(self, portinghacks):
         self.port = portinghacks
         self.meshstatus = MeshStatus(portinghacks)
+
         self.menu = Gtk.Menu()
+        # update the menu whenever NetworkManager changes
+        NetworkManager.NetworkManager.connect_to_signal('StateChanged', self.create_menu)
+        NetworkManager.NetworkManager.connect_to_signal('PropertiesChanged', self.create_menu)
+        NetworkManager.NetworkManager.connect_to_signal('DeviceAdded', self.create_menu)
+        NetworkManager.NetworkManager.connect_to_signal('DeviceRemoved', self.create_menu)
 
 
     def get_visible_adhocs(self):
@@ -287,12 +294,14 @@ class CommotionMeshApplet():
 
     def show_menu(self, widget, event, applet):
         if event.type == Gtk.gdk.BUTTON_PRESS and event.button == 1:
-            self.create_menu()
             self.menu.popup( None, None, None, event.button, event.time )
             widget.emit_stop_by_name("button_press_event")
 
 
-    def create_menu(self):
+    def create_menu(self, ignored=None):
+        # empty the menu first before filling it up
+        for widget in self.menu.get_children():
+            self.menu.remove(widget)
 
         header_added = False
         actives, visibles, strengths = self.get_visible_adhocs()
@@ -326,7 +335,7 @@ class CommotionMeshApplet():
         self.add_menu_about()
         self.add_menu_quit()
 
-        return self.menu
+        return True
 
 
     def show_mesh_status(self, *arguments):
