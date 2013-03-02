@@ -194,6 +194,7 @@ class CommotionMeshApplet():
     def __init__(self, portinghacks):
         self.port = portinghacks
         self.meshstatus = MeshStatus(portinghacks)
+        self.menu = Gtk.Menu()
 
 
     def get_visible_adhocs(self):
@@ -232,8 +233,8 @@ class CommotionMeshApplet():
         self.add_menu_item(self.port.STOCK_ABOUT, self.show_about)
 
 
-    def add_menu_gtk2_quit(self):
-        self.add_menu_item(Gtk.STOCK_QUIT, self.do_exit)
+    def add_menu_quit(self):
+        self.add_menu_item("Quit", self.do_exit)
 
 
     def add_menu_separator(self):
@@ -292,7 +293,6 @@ class CommotionMeshApplet():
 
 
     def create_menu(self):
-        self.menu = Gtk.Menu()
 
         header_added = False
         actives, visibles, strengths = self.get_visible_adhocs()
@@ -324,6 +324,7 @@ class CommotionMeshApplet():
         self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
         self.add_menu_separator()
         self.add_menu_about()
+        self.add_menu_quit()
 
         return self.menu
 

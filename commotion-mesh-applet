@@ -28,6 +28,5 @@ if __name__ == "__main__":
 
     cma = CommotionMeshApplet(port)
     cma.create_menu()
-    cma.add_menu_item("Quit", sys.exit)
     ind.set_menu(cma.menu)
     Gtk.main()
