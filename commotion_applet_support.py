@@ -12,7 +12,7 @@ import urllib2
 import pprint
 
 try:
-    from gi.repository import Gtk
+    from gi.repository import Gtk, GObject
 except: # Can't use ImportError, as gi.repository isn't quite that nice...
     import gtk as Gtk
 
@@ -41,6 +41,12 @@ class MeshStatus():
         self.port = portinghacks
         self.jsoninfo = JsonInfo()
         self.imagedir = '/usr/share/icons/hicolor/32x32/actions'
+        # liststore data:  IP, LQ, NLQ, have_internet, have_HNA
+        self.liststore = Gtk.ListStore(str, int, int, bool, bool)
+        self.mesh_connected = False
+        self.myip = ''
+        self.other_routes = []
+        self.default_routes = []
 
     def _set_icon(self, cell, filename):
         fullfilename = os.path.join(self.imagedir, filename)
@@ -57,61 +63,71 @@ class MeshStatus():
     def dump(self, which='/all'):
         return JsonInfo().dump(which)
 
-    def show(self):
-        window = Gtk.Window()
-        window.set_title('Mesh Status (Links and HNA)')
-        window.set_resizable(False)
-        vbox = Gtk.VBox(homogeneous=False, spacing=5)
-        window.add(vbox)
+    def update(self):
+        self.liststore.clear()
 
         links_hna = self.jsoninfo.dict('/links/hna')
-        # liststore data:  IP, LQ, NLQ, have_internet, have_HNA
-        liststore = Gtk.ListStore(str, int, int, bool, bool)
         if links_hna:
-            connected = True
-            hna = []
-            internet = []
+            self.mesh_connected = True
+            self.other_routes = []
+            self.default_routes = []
             for i in links_hna['hna']:
                 if i['destination'] == '0.0.0.0':
-                    internet.append(i['gateway'])
+                    self.default_routes.append(i['gateway'])
                 else:
-                    hna.append(i['gateway'])
+                    self.other_routes.append(i['gateway'])
             for link in links_hna['links']:
                 ip = link['remoteIP']
                 lqPercent = int(link['linkQuality']*100)
                 nlqPercent = int(link['neighborLinkQuality']*100)
                 cell = [ ip, lqPercent, nlqPercent ]
-                if ip in internet:
+                if ip in self.default_routes:
                     cell.append(True)
                 else:
                     cell.append(False)
-                if ip in hna:
+                if ip in self.other_routes:
                     cell.append(True)
                 else:
                     cell.append(False)
-                liststore.append(cell)
+                self.liststore.append(cell)
         else:
-            connected = False
-        myip = link['localIP']
+            self.mesh_connected = False
+        self.myip = link['localIP']
+
+        return True
+
+    def on_delete_event(self, widget, event):
+        GObject.source_remove(self.timeout_id)
+        return False
+
+    def show(self):
+        self.update()
+        self.timeout_id = GObject.timeout_add(5000, self.update)
+        window = Gtk.Window()
+        window.set_title('Mesh Status (Links and HNA)')
+        window.set_resizable(False)
+        window.connect('delete-event', self.on_delete_event)
+        vbox = Gtk.VBox(homogeneous=False, spacing=5)
+        window.add(vbox)
 
         infobar = Gtk.InfoBar()
-        if connected:
+        if self.mesh_connected:
             infobar.set_message_type(self.port.MESSAGE_OTHER)
-            label = Gtk.Label('mesh address: ' + myip)
+            label = Gtk.Label('mesh address: ' + self.myip)
         else:
             infobar.set_message_type(self.port.MESSAGE_ERROR)
             label = Gtk.Label('Not connected to a mesh!')
         content = infobar.get_content_area()
         content.set_homogeneous(False)
         content.pack_start(label, False, True, 0)
-        if myip in hna:
+        if self.myip in self.other_routes:
             image = Gtk.Image()
             image.set_from_file(os.path.join(self.imagedir, 'other_route.png'))
             content.pack_start(image, False, True, 0)
             need_filler = True
         else:
             need_filler = False
-        if myip in internet:
+        if self.myip in self.default_routes:
             image = Gtk.Image()
             image.set_from_file(os.path.join(self.imagedir, 'default_route.png'))
             # leave empty space so the internet icon is properly aligned
@@ -121,7 +137,7 @@ class MeshStatus():
                 content.pack_end(image, False, True, 0)
         vbox.pack_start(infobar, False, True, 0)
 
-        treeview = Gtk.TreeView(model=liststore)
+        treeview = Gtk.TreeView(model=self.liststore)
         selection = treeview.get_selection()
         selection.set_mode(self.port.SELECTION_NONE)
         vbox.pack_start(treeview, True, True, 3)
