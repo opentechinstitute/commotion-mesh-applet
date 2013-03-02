@@ -294,12 +294,14 @@ class CommotionMeshApplet():
     def create_menu(self):
         self.menu = Gtk.Menu()
 
-        self.add_menu_label('Active Mesh')
-
+        header_added = False
         actives, visibles, strengths = self.get_visible_adhocs()
         profiles = self.get_profiles()
         for profile in actives:
             if profile in profiles:
+                if not header_added:
+                    self.add_menu_label('Active Mesh')
+                    header_added = True
                 self.add_menu_item(profile[0], self.choose_profile,
                                    os.path.join(self.nm_icon_dir, 'nm-adhoc.png'))
                 self.add_menu_label('BSSID: ' + profile[1])
