@@ -48,17 +48,24 @@ class MeshStatus():
         self.other_routes = []
         self.default_routes = []
 
-    def _set_icon(self, cell, filename):
-        fullfilename = os.path.join(self.imagedir, filename)
-        cell.set_property("pixbuf", self.port.pixbuf_new_from_file(fullfilename))
+    def _set_icon(self, cell, filename=None):
+        if filename:
+            fullfilename = os.path.join(self.imagedir, filename)
+            cell.set_property("pixbuf", self.port.pixbuf_new_from_file(fullfilename))
+        else:
+            cell.set_property("pixbuf", None)
 
-    def _internet_icon(self, column, cell, model, iter, destroy=None):
+    def _default_route_icon(self, column, cell, model, iter, destroy=None):
         if model[iter][3]:
             self._set_icon(cell, 'default_route.png')
+        else:
+            self._set_icon(cell)
 
-    def _hna_icon(self, column, cell, model, iter, destroy=None):
+    def _other_route_icon(self, column, cell, model, iter, destroy=None):
         if model[iter][4]:
             self._set_icon(cell, 'other_route.png')
+        else:
+            self._set_icon(cell)
 
     def dump(self, which='/all'):
         return JsonInfo().dump(which)
@@ -171,7 +178,7 @@ class MeshStatus():
         treeview.append_column(column)
         cell = Gtk.CellRendererPixbuf()
         column.pack_start(cell, False)
-        column.set_cell_data_func(cell, self._hna_icon)
+        column.set_cell_data_func(cell, self._other_route_icon)
 
         column = Gtk.TreeViewColumn("Internet?")
         column.set_alignment(0.5)
@@ -179,7 +186,7 @@ class MeshStatus():
         treeview.append_column(column)
         cell = Gtk.CellRendererPixbuf()
         column.pack_start(cell, False)
-        column.set_cell_data_func(cell, self._internet_icon)
+        column.set_cell_data_func(cell, self._default_route_icon)
 
         window.show_all()
 
