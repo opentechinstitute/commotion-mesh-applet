@@ -310,9 +310,30 @@ class CommotionMeshApplet():
 
 
     def choose_profile(self, *arguments):
-        print('choose_profile: '),
-        pprint.pprint(arguments)
-        print('Launching: ' + arguments[0].get_name())
+        connections = NetworkManager.Settings.ListConnections()
+        connections = dict([(x.GetSettings()['connection']['id'], x) for x in connections])
+
+        name = arguments[0].get_label()
+        try:
+            conn = connections[name]
+        except KeyError as e:
+            print('error: ' + name + ' does not exist as a connection (' + str(e) + ')')
+            return
+
+        ctype = conn.GetSettings()['connection']['type']
+        if ctype != '802-11-wireless':
+            print(name + ' is not a wifi device!')
+            return
+
+        devices = NetworkManager.NetworkManager.GetDevices()
+        for dev in devices:
+            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
+                break
+        else:
+            print('No wifi device found!')
+            return
+
+        NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
 
 
     def show_menu(self, widget, event, applet):
