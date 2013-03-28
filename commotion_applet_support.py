@@ -99,7 +99,10 @@ class MeshStatus():
                 self.liststore.append(cell)
         else:
             self.mesh_connected = False
-        self.myip = link['localIP']
+        if link:
+            self.myip = link['localIP']
+        else:
+            self.myip = ''
 
         return True
 
@@ -311,6 +314,7 @@ class CommotionMeshApplet():
 
     def choose_profile(self, *arguments):
         connections = NetworkManager.Settings.ListConnections()
+        pprint.pprint(connections)
         connections = dict([(x.GetSettings()['connection']['id'], x) for x in connections])
 
         name = arguments[0].get_label()
