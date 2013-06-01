@@ -296,19 +296,19 @@ class CommotionMeshApplet():
 
     def add_visible_profile_menu_item(self, name, function, strength):
         if strength > 98:
-            self.add_menu_item(menu, name, function,
+            self.add_menu_item(self.menu, name, function,
                                os.path.join(self.nm_icon_dir, 'nm-signal-100.png'))
         elif strength >= 75:
-            self.add_menu_item(menu, name, function,
+            self.add_menu_item(self.menu, name, function,
                                os.path.join(self.nm_icon_dir, 'nm-signal-75.png'))
         elif strength >= 50:
-            self.add_menu_item(menu, name, function,
+            self.add_menu_item(self.menu, name, function,
                                os.path.join(self.nm_icon_dir, 'nm-signal-50.png'))
         elif strength >= 25:
-            self.add_menu_item(menu, name, function,
+            self.add_menu_item(self.menu, name, function,
                                os.path.join(self.nm_icon_dir, 'nm-signal-25.png'))
         else:
-            self.add_menu_item(menu, name, function,
+            self.add_menu_item(self.menu, name, function,
                                os.path.join(self.nm_icon_dir, 'nm-signal-00.png'))
 
 
