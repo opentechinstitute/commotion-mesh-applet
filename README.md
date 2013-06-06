@@ -13,9 +13,10 @@ Installing
 ----------
 
 If you are using Debian, Ubuntu, Mint, or any other Debian-derivative, you can
-install Commotion by running these two lines in your Terminal app:
+install Commotion by running these three lines in your Terminal app:
 
     sudo add-apt-repository ppa:guardianproject/commotion
+    sudo apt-get update
     sudo apt-get install commotion-mesh-applet
 
 You should see the key ID 6B80A84207B30AC9DEE235FEF50EADDD2234F563 (aka
