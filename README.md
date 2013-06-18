@@ -29,7 +29,7 @@ Bugs
 If you encounter any problems or wish to request features, please add them to
 our issue tracker:
 
-https://code.commotionwireless.net/projects/commotion-linux/
+https://code.commotionwireless.net/projects/commotion-linux/issues
 
 
 Building
