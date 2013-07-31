@@ -10,6 +10,7 @@ import sys
 import urllib2
 
 import pprint
+import subprocess
 
 try:
     from gi.repository import Gtk, GObject
@@ -333,9 +334,15 @@ class CommotionMeshApplet():
         for dev in devices:
             if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
                 break
+	
         else:
             print('No wifi device found!')
             return
+        
+        wpa_ver = subprocess.check_output(['wpa_supplicant', '-v']).split()[1].strip('v')
+        if int(wpa_ver.split('.')[0]) < 1:
+                print("wpa_supplicant version " + wpa_ver + " does not support ad-hoc encryption.  Starting replacement version...")
+                subprocess.call(['/usr/bin/gksudo', 'fallback.sh ' + os.path.join('/etc/nm-dispatcher/', name) + ' ' + dev.Interface])
 
         NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
 
