@@ -11,6 +11,7 @@ import urllib2
 
 import pprint
 import subprocess
+import re
 
 try:
     from gi.repository import Gtk, GObject
@@ -262,6 +263,8 @@ class CommotionMeshApplet():
             profiles.append(tuple([p['ssid'], bssid, channel]))
         return tuple(profiles)
 
+#    def write_wpasupplicant_conf(self, NMConn):
+#	connSettings = NMConn.GetSettings()
 
     def add_menu_about(self):
         self.add_menu_item(self.port.STOCK_ABOUT, self.show_about)
@@ -311,6 +314,51 @@ class CommotionMeshApplet():
         else:
             self.add_menu_item(self.menu, name, function,
                                os.path.join(self.nm_icon_dir, 'nm-signal-00.png'))
+    def readProfiles(self):
+        '''get all the available mesh profiles and return as a dict'''
+        profiles = dict()
+        self.log('\n----------------------------------------')
+        self.log('Reading profiles:')
+        for f in glob.glob('/etc/nm-dispatcher-olsrd/*.profile'):
+            profname = os.path.split(f.strip('.profile'))[1]
+            profile = readProfile(self, profname)
+            self.log('reading profile: "' + f + '"')
+                       self.log('adding "' + f + '" as profile "' + p['ssid'] + '"')
+            profiles[p['ssid']] = profile
+        return profiles
+
+    def readProfile(self, profname)
+        f = os.path.join('/etc/nm-dispatcher-olsrd/', profname + '.profile')
+        p = pyjavaproperties.Properties()
+        p.load(open(f))
+        profile = dict()
+        profile['filename'] = f
+        profile['mtime'] = os.path.getmtime(f)
+        for k,v in p.items():
+            profile[k] = v
+        conf = re.sub('(.*)\.profile', r'\1.conf', f)
+        if os.path.exists(conf):
+            self.log('profile has custom olsrd.conf: "' + conf + '"')
+            profile['conf'] = conf
+        else:
+            self.log('using built in olsrd.conf: "' + self.olsrdconf + '"')
+            profile['conf'] = self.olsrdconf
+        return profile
+
+    def startOlsrd(self, interface, conf):
+        '''start the olsrd daemon'''
+        #self.log('start olsrd: ')
+        cmd = ['/usr/sbin/olsrd', '-i' interface, '-f', conf]
+        #self.log(" ".join([x for x in cmd]))
+        p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if out:
+            print('stdout: ' + out)
+        #    self.log('stdout: ' + out)
+        if err:
+            print('stderr: ' + err)
+        #    self.log('stderr: ' + err)
 
 
     def choose_profile(self, *arguments):
@@ -341,10 +389,16 @@ class CommotionMeshApplet():
         
         wpa_ver = subprocess.check_output(['wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1:
-                print("wpa_supplicant version " + wpa_ver + " does not support ad-hoc encryption.  Starting replacement version...")
-                subprocess.call(['/usr/bin/gksudo', 'fallback.sh ' + os.path.join('/etc/nm-dispatcher/', name) + ' ' + dev.Interface])
-
-        NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
+                if not os.path.exists(os.path.join('etc/nm-dispatcher', name, '.wpasupplicant':
+                       print('No wpasupplicant config file available!')
+                       #write_wpasupplicant_conf(self, conn) 
+                profile = readProfile(self, name)
+                interface = str(dev.Interface)
+                print("wpa_supplicant version " + wpa_ver + " does not support ad-hoc encryption.")  #Starting replacement version...")
+                #startOlsrd(self, interface, profile['conf'])
+                #subprocess.call(['/usr/bin/gksudo', 'fallback.sh ' + os.path.join('/etc/nm-dispatcher/', name, '.wpasupplicant') + ' ' + interface])
+        else:
+	        NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
 
 
     def show_menu(self, widget, event, applet):
