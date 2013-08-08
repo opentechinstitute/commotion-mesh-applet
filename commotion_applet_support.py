@@ -322,7 +322,7 @@ class CommotionMeshApplet():
         for f in glob.glob('/etc/nm-dispatcher-olsrd/*.profile'):
             profname = os.path.split(f.strip('.profile'))[1]
             #self.log('reading profile: "' + f + '"')
-            profile = readProfile(self, profname)
+            profile = self.readProfile( profname)
             #self.log('adding "' + f + '" as profile "' + p['ssid'] + '"')
             profiles[p['ssid']] = profile
         return profiles
@@ -389,16 +389,18 @@ class CommotionMeshApplet():
          
         wpa_ver = subprocess.check_output(['wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
-                if not os.path.exists(os.path.join('/etc/nm-dispatcher', name + '.wpasupplicant')):
+                if not os.path.exists(os.path.join('/etc/nm-dispatcher-olsrd', name + '.wpasupplicant')):
                        print('No wpasupplicant config file available!')
-                       #write_wpasupplicant_conf(self, conn) 
+                       #write_wpasupplicant_conf(self, conn), and/or do something to stop the progression of the script if this fails
                 profile = readProfile(self, name)
                 interface = str(dev.Interface)
                 print('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.')  #Starting replacement version...")
-                print subprocess.check_call(['nmcli', 'nm sleep true'])
-                subprocess.Popen(['/usr/share/commotion_wpa_supplicant', '-Dnl80211', '-i' + interface, '-c' + os.path.join('/etc/nm-dispatcher', name + '.wpasupplicant')])
+                print subprocess.check_call(['nmcli', 'nm', 'sleep', 'true'])
+                print subprocess.check_call(['pkill', '-9', 'wpa_supplicant'])
+                #Check for existance of replacement binary
+                subprocess.Popen(['/usr/share/commotion_wpa_supplicant', '-Dnl80211', '-i' + interface, '-c' + os.path.join('/etc/nm-dispatcher-olsrd', name + '.wpasupplicant')])
                 print subprocess.check_call(['ifconfig', interface, 'up', '5.5.5.5', '255.0.0.0'])
-                startOlsrd(self, interface, profile['conf'])
+                self.startOlsrd(interface, profile['conf'])
         else:
 	        NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
 
