@@ -12,6 +12,8 @@ import urllib2
 import pprint
 import subprocess
 import re
+import struct
+import socket
 
 try:
     from gi.repository import Gtk, GObject
@@ -389,17 +391,18 @@ class CommotionMeshApplet():
          
         wpa_ver = subprocess.check_output(['wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
+                print('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.')  #Starting replacement version...")
                 if not os.path.exists(os.path.join('/etc/nm-dispatcher-olsrd', name + '.wpasupplicant')):
                        print('No wpasupplicant config file available!')
                        #write_wpasupplicant_conf(self, conn), and/or do something to stop the progression of the script if this fails
                 profile = readProfile(self, name)
                 interface = str(dev.Interface)
-                print('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.')  #Starting replacement version...")
-                print subprocess.check_call(['nmcli', 'nm', 'sleep', 'true'])
-                print subprocess.check_call(['pkill', '-9', 'wpa_supplicant'])
+                staticip = socket.inet_ntoa(struct.pack('=I', conn.GetSettings()['ipv4']['addresses'][0][0]))
+                print subprocess.check_call(['gksu', '-D', 'Encrypted mesh connection routine', 'nmcli nm sleep true'])
+                print subprocess.check_call(['gksu', 'pkill -9 wpa_supplicant'])
                 #Check for existance of replacement binary
-                subprocess.Popen(['/usr/share/commotion_wpa_supplicant', '-Dnl80211', '-i' + interface, '-c' + os.path.join('/etc/nm-dispatcher-olsrd', name + '.wpasupplicant')])
-                print subprocess.check_call(['ifconfig', interface, 'up', '5.5.5.5', '255.0.0.0'])
+                subprocess.Popen(['gksu', '/usr/share/commotion_wpa_supplicant -Dnl80211 -i' + interface + '-c' + os.path.join('/etc/nm-dispatcher-olsrd', name + '.wpasupplicant')])
+                print subprocess.check_call(['gksu', 'ifconfig ' + interface + ' up ' + staticip  + ' netmask 255.0.0.0'])
                 self.startOlsrd(interface, profile['conf'])
         else:
 	        NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
@@ -518,6 +521,8 @@ class CommotionMeshApplet():
 
 
     def do_exit(self, *arguments):
+        if 'asleep' in subprocess.check_output(['nmcli', 'nm', 'status']):
+            print subprocess.check_call(['gksu', 'killall -9 -r .*wpa_supplicant.* -r .*olsrd.*'])
         sys.exit()
 
 
