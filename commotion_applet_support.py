@@ -233,7 +233,7 @@ class CommotionMeshApplet():
         actives = []
         nets = []
         strengths = dict()
-        for ac in NetworkManager.NetworkManager.ActiveConnections:
+        for ac in NetworkManager.NetworkManager.ActiveConnections: #This won't work if there isn't already an active connection
             for d in ac.Devices:
                 if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
                     wireless = d.SpecificDevice()
@@ -243,7 +243,7 @@ class CommotionMeshApplet():
                         actives.append(tuple([aap.Ssid, aap.HwAddress, channel]))
                     for ap in wireless.GetAccessPoints():
                         if ap.Mode == NetworkManager.NM_802_11_MODE_ADHOC:
-                            channel = (aap.Frequency - 2407) / 5
+                            channel = (ap.Frequency - 2407) / 5
                             nets.append(tuple([ap.Ssid, ap.HwAddress, channel]))
                             strengths[ap.Ssid] = ap.Strength
         return [tuple(actives), tuple(nets), strengths]
@@ -282,20 +282,15 @@ class CommotionMeshApplet():
 
     def add_visible_profile_menu_item(self, name, function, strength):
         if strength > 98:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-100.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-100.png'))
         elif strength >= 75:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-75.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-75.png'))
         elif strength >= 50:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-50.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-50.png'))
         elif strength >= 25:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-25.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-25.png'))
         else:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-00.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-00.png'))
 
 
     def choose_profile(self, *arguments):
@@ -346,7 +341,7 @@ class CommotionMeshApplet():
 
         header_added = False
         actives, visibles, strengths = self.get_visible_adhocs()
-        profiles = [(params['ssid'], params['bssid'], params['channel']) for profile, params in self.commotion.readProfiles().iteritems()]
+        profiles = ((params['ssid'], params['bssid'], int(params['channel']) for profile, params in self.commotion.readProfiles().iteritems())
         for profile in actives:
             if profile in profiles:
                 if not header_added:
