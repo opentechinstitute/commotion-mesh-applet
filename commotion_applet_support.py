@@ -98,7 +98,7 @@ class MeshStatus():
                 self.liststore.append(cell)
         else:
             self.mesh_connected = False
-        if link:
+        if 'link' in locals():
             self.myip = link['localIP']
         else:
             self.myip = ''
@@ -263,11 +263,13 @@ class CommotionMeshApplet():
 
 
     def add_menu_item(self, name, function, imagefile=None):
-        item = Gtk.ImageMenuItem(name)
+        item = Gtk.ImageMenuItem()
         if imagefile:
             icon = Gtk.Image()
             icon.set_from_file(imagefile)
             item.set_image(icon)
+            item.set_always_show_image(True)
+        item.set_label(name)
         item.show()
         item.connect( "activate", function)
         self.menu.add(item)
@@ -312,7 +314,7 @@ class CommotionMeshApplet():
 
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
-            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
+            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State > 20: #dev.State values 0, 10, and 20 indicate that interface is in an unusable state
                 break
 	
         else:
@@ -322,7 +324,8 @@ class CommotionMeshApplet():
         wpa_ver = subprocess.check_output(['wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             print('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
-            subprocess.call(['gksu', '/usr/share/pyshared/fallback.py ' + name])
+            ## dev.Disconnect() Necessary?
+            subprocess.Popen(['gksu', '/usr/share/pyshared/fallback.py ' + name])
 
         else:
 	    NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
