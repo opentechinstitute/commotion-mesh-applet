@@ -344,7 +344,7 @@ class CommotionMeshApplet():
 
         header_added = False
         actives, visibles, strengths = self.get_visible_adhocs()
-        profiles = ((params['ssid'], params['bssid'], int(params['channel']) for profile, params in self.commotion.readProfiles().iteritems())
+        profiles = ((params['ssid'], params['bssid'], int(params['channel'])) for profile, params in self.commotion.readProfiles().iteritems())
         for profile in actives:
             if profile in profiles:
                 if not header_added:
