@@ -325,7 +325,7 @@ class CommotionMeshApplet():
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             print('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
             ## dev.Disconnect() Necessary?
-            subprocess.Popen(['gksu', '/usr/share/pyshared/fallback.py ' + name])
+            subprocess.Popen(['gksu', '/usr/share/pyshared/fallback.py ' + name + ' up'])
 
         else:
 	    NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
@@ -428,9 +428,7 @@ class CommotionMeshApplet():
 
     def disconnect(self, *arguments):
         if 'asleep' in subprocess.check_output(['nmcli', 'nm', 'status']):
-            print subprocess.call(['gksu', 'pkill -9 commotion_wpa'])
-            print subprocess.call(['gksu', 'pkill -9 olsrd'])
-            print subprocess.call(['gksu', 'nmcli nm sleep false'])
+            print subprocess.call(['gksu', '/usr/share/pyshared/fallback.py', 'all down'])
         else:
             for ac in NetworkManager.NetworkManager.ActiveConnections:
                 for d in ac.Devices:
