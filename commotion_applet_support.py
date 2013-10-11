@@ -321,7 +321,7 @@ class CommotionMeshApplet():
             print('No wifi device found!')
             return
          
-        wpa_ver = subprocess.check_output(['wpa_supplicant', '-v']).split()[1].strip('v')
+        wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             print('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
             ## dev.Disconnect() Necessary?
