@@ -220,7 +220,7 @@ class CommotionMeshApplet():
     def __init__(self, portinghacks):
         self.port = portinghacks
         self.meshstatus = MeshStatus(portinghacks)
-        self.commotion = commotionc.CommotionCore('/tmp/commotion-mesh-applet')
+        self.commotion = commotionc.CommotionCore('commotion-mesh-applet')
         self.menu = Gtk.Menu()
         # update the menu whenever NetworkManager changes
         NetworkManager.NetworkManager.connect_to_signal('StateChanged', self.create_menu)
@@ -304,12 +304,12 @@ class CommotionMeshApplet():
         try:
             conn = connections[name]
         except KeyError as e:
-            print('error: ' + name + ' does not exist as a connection (' + str(e) + ')')
+            self.commotion.log('error: ' + name + ' does not exist as a connection (' + str(e) + ')')
             return
 
         ctype = conn.GetSettings()['connection']['type']
         if ctype != '802-11-wireless':
-            print(name + ' is not a wifi device!')
+            self.commotion.log(name + ' is not a wifi device!')
             return
 
         devices = NetworkManager.NetworkManager.GetDevices()
@@ -318,12 +318,12 @@ class CommotionMeshApplet():
                 break
 	
         else:
-            print('No wifi device found!')
+            self.commotion.log('No wifi device found!')
             return
          
         wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
-            print('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
+            self.commotion.log('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
             ## dev.Disconnect() Necessary?
             subprocess.Popen(['gksu', '/usr/share/pyshared/fallback.py ' + name + ' up'])
 
@@ -428,7 +428,7 @@ class CommotionMeshApplet():
 
     def disconnect(self, *arguments):
         if 'asleep' in subprocess.check_output(['nmcli', 'nm', 'status']):
-            print subprocess.call(['gksu', '/usr/share/pyshared/fallback.py', 'all down'])
+            subprocess.call(['gksu', '/usr/share/pyshared/fallback.py', 'all down'])
         else:
             for ac in NetworkManager.NetworkManager.ActiveConnections:
                 for d in ac.Devices:
