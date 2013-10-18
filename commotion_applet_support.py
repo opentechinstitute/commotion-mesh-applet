@@ -372,6 +372,7 @@ class CommotionMeshApplet():
         self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
         self.add_menu_item('Disconnect From Mesh', self.disconnect)
         self.add_menu_separator()
+        self.add_menu_item('Edit Mesh Network Profiles', self.edit_profiles)
         self.add_menu_about()
         self.add_menu_quit()
 
@@ -434,7 +435,16 @@ class CommotionMeshApplet():
                 for d in ac.Devices:
                     if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
                         NetworkManager.NetworkManager.DeactivateConnection(ac)
-            
+
+    def edit_profiles(self, *arguments):
+        subprocess.Popen(['gksudo', 'xterm -e vi ' + self.commotion.profiledir])
+        instructions = Gtk.MessageDialog(toplevel,
+                                        self.port.DIALOG_DESTROY_WITH_PARENT,
+                                        self.port.MESSAGE_INFO,
+                                        (Gtk.BUTTONS_OK),
+                                        'All mesh profile files are stored in this folder. Make any desired changes to any of the profiles (as the root user), and then close the file browser.')
+        instructions.run()
+        instructions.destroy()
 
     def show_about(self, *arguments):
         about_dialog = Gtk.AboutDialog()
