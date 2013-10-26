@@ -218,9 +218,9 @@ class CommotionMeshApplet():
     nm_icon_dir = '/usr/share/icons/hicolor/22x22/apps'
 
     def __init__(self, portinghacks):
+        self.commotion = commotionc.CommotionCore('commotion-mesh-applet')
         self.port = portinghacks
         self.meshstatus = MeshStatus(portinghacks)
-        self.commotion = commotionc.CommotionCore('commotion-mesh-applet')
         self.menu = Gtk.Menu()
         # update the menu whenever NetworkManager changes
         NetworkManager.NetworkManager.connect_to_signal('StateChanged', self.create_menu)
@@ -315,6 +315,7 @@ class CommotionMeshApplet():
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
             if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State > 20: #dev.State values 0, 10, and 20 indicate that interface is in an unusable state
+                #dev.Interface, dev.Driver
                 break
 	
         else:
@@ -355,6 +356,11 @@ class CommotionMeshApplet():
                 self.add_menu_label('BSSID: ' + profile[1])
                 self.add_menu_label('Channel: ' + str(profile[2]))
                 self.add_menu_separator()
+                self.add_menu_item('Browse Local Apps...', self.launch_app_browser)
+                self.add_menu_item('Show Mesh Status', self.show_mesh_status)
+                self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
+                self.add_menu_item('Disconnect From Mesh', self.disconnect)
+                self.add_menu_separator()
 
         self.add_menu_label('Available Profiles')
         for profile in profiles:
@@ -366,25 +372,41 @@ class CommotionMeshApplet():
             else:
                 self.add_menu_item(profile[0], self.choose_profile)
 
+        self.add_menu_item('Edit Mesh Network Profiles...', self.edit_profiles)
+        #self.add_menu_item('Show Debug Log', self.show_debug_log)
+        if not header_added:
+                self.add_menu_label('Browse Local Apps...')
+                self.add_menu_label('Show Mesh Status')
+                self.add_menu_label('Save Mesh Status To File...')
+                self.add_menu_label('Disconnect From Mesh')
         self.add_menu_separator()
-        self.add_menu_item('Show Mesh Status', self.show_mesh_status)
-        self.add_menu_item('Show Debug Log', self.show_debug_log)
-        self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
-        self.add_menu_item('Disconnect From Mesh', self.disconnect)
-        self.add_menu_separator()
-        self.add_menu_item('Edit Mesh Network Profiles', self.edit_profiles)
         self.add_menu_about()
         self.add_menu_quit()
 
         return True
 
 
+    def edit_profiles(self, *arguments):
+        subprocess.Popen(['gksudo', 'xterm -e vi ' + self.commotion.profiledir])
+        instructions = Gtk.MessageDialog(toplevel,
+                                        self.port.DIALOG_DESTROY_WITH_PARENT,
+                                        self.port.MESSAGE_INFO,
+                                        (Gtk.BUTTONS_OK),
+                                        'All mesh profile files are stored in this folder. Make any desired changes to any of the profiles (as the root user), and then close the file browser.')
+        instructions.run()
+        instructions.destroy()
+
+
+    def launch_app_browser(self, *arguments):
+        os.system('xdg-open http://localhost:8080 &')
+
+        
     def show_mesh_status(self, *arguments):
         self.meshstatus.show()
 
 
-    def show_debug_log(self, *arguments):
-        os.system('xdg-open /tmp/nm-dispatcher-olsrd.log &')
+    #def show_debug_log(self, *arguments):
+    #    os.system('xdg-open /tmp/nm-dispatcher-olsrd.log &')
 
 
     def save_mesh_status_to_file(self, *arguments):
@@ -435,16 +457,6 @@ class CommotionMeshApplet():
                 for d in ac.Devices:
                     if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
                         NetworkManager.NetworkManager.DeactivateConnection(ac)
-
-    def edit_profiles(self, *arguments):
-        subprocess.Popen(['gksudo', 'xterm -e vi ' + self.commotion.profiledir])
-        instructions = Gtk.MessageDialog(toplevel,
-                                        self.port.DIALOG_DESTROY_WITH_PARENT,
-                                        self.port.MESSAGE_INFO,
-                                        (Gtk.BUTTONS_OK),
-                                        'All mesh profile files are stored in this folder. Make any desired changes to any of the profiles (as the root user), and then close the file browser.')
-        instructions.run()
-        instructions.destroy()
 
     def show_about(self, *arguments):
         about_dialog = Gtk.AboutDialog()
