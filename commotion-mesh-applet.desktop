@@ -1,4 +1,3 @@
-
 [Desktop Entry]
 Encoding=UTF-8
 Name=Commotion Mesh Applet
@@ -8,5 +7,4 @@ Exec=/usr/lib/gnome-applets/commotion-mesh-applet
 Terminal=false
 Type=Application
 StartupNotify=false
-NoDisplay=true
 Categories=System;Monitor;GTK;
