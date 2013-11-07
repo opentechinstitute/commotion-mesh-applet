@@ -315,7 +315,7 @@ class CommotionMeshApplet():
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
             if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State > 20: #dev.State values 0, 10, and 20 indicate that interface is in an unusable state
-                #dev.Interface, dev.Driver
+                #if dev.Interface == self.commotion.selectInterface(): #dev.Driver
                 break
 	
         else:
@@ -326,7 +326,7 @@ class CommotionMeshApplet():
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             self.commotion.log('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
             ## dev.Disconnect() Necessary?
-            subprocess.Popen(['gksu', '/usr/share/pyshared/fallback.py ' + name + ' up'])
+            subprocess.Popen(['gksudo', '/usr/share/pyshared/fallback.py ' + name + ' up'])
 
         else:
 	    NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
@@ -387,15 +387,8 @@ class CommotionMeshApplet():
 
 
     def edit_profiles(self, *arguments):
-        subprocess.Popen(['gksudo', 'xterm -e vi ' + self.commotion.profiledir])
-        instructions = Gtk.MessageDialog(toplevel,
-                                        self.port.DIALOG_DESTROY_WITH_PARENT,
-                                        self.port.MESSAGE_INFO,
-                                        (Gtk.BUTTONS_OK),
-                                        'All mesh profile files are stored in this folder. Make any desired changes to any of the profiles (as the root user), and then close the file browser.')
-        instructions.run()
-        instructions.destroy()
-
+        subprocess.call(['xdg-open', self.commotion.profiledir])
+        subprocess.call(['gksudo', '/etc/NetworkManager/dispatcher.d/nm-dispatcher-olsrd none none'])
 
     def launch_app_browser(self, *arguments):
         os.system('xdg-open http://localhost:8080 &')
@@ -450,8 +443,8 @@ class CommotionMeshApplet():
         dialog.destroy()
 
     def disconnect(self, *arguments):
-        if 'asleep' in subprocess.check_output(['nmcli', 'nm', 'status']):
-            subprocess.call(['gksu', '/usr/share/pyshared/fallback.py', 'all down'])
+        if 'asleep' in subprocess.check_output(['/usr/bin/nmcli', 'nm', 'status']):
+            subprocess.call(['gksudo', '/usr/share/pyshared/fallback.py', 'all down'])
         else:
             for ac in NetworkManager.NetworkManager.ActiveConnections:
                 for d in ac.Devices:
