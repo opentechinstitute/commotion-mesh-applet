@@ -358,7 +358,6 @@ class CommotionMeshApplet():
                 self.add_menu_separator()
                 self.add_menu_item('Browse Local Apps...', self.launch_app_browser)
                 self.add_menu_item('Show Mesh Status', self.show_mesh_status)
-                self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
                 self.add_menu_item('Disconnect From Mesh', self.disconnect)
                 self.add_menu_separator()
 
@@ -373,11 +372,11 @@ class CommotionMeshApplet():
                 self.add_menu_item(profile[0], self.choose_profile)
 
         self.add_menu_item('Edit Mesh Network Profiles...', self.edit_profiles)
+        self.add_menu_item('Disconnect All Mesh Connections', self.disconnect)
         #self.add_menu_item('Show Debug Log', self.show_debug_log)
         if not header_added:
                 self.add_menu_label('Browse Local Apps...')
                 self.add_menu_label('Show Mesh Status')
-                self.add_menu_label('Save Mesh Status To File...')
                 self.add_menu_label('Disconnect From Mesh')
         self.add_menu_separator()
         self.add_menu_about()
@@ -398,49 +397,49 @@ class CommotionMeshApplet():
         self.meshstatus.show()
 
 
-    #def show_debug_log(self, *arguments):
-    #    os.system('xdg-open /tmp/nm-dispatcher-olsrd.log &')
+#    def show_debug_log(self, *arguments):
+#        os.system('xdg-open /tmp/nm-dispatcher-olsrd.log &')
 
 
-    def save_mesh_status_to_file(self, *arguments):
-        toplevel = arguments[0].get_toplevel()
-        dialog = Gtk.FileChooserDialog("Save Mesh Status to File...",
-                                       toplevel,
-                                       self.port.FILE_CHOOSER_ACTION_SAVE,
-                                       (Gtk.STOCK_CANCEL, self.port.RESPONSE_CANCEL,
-                                        Gtk.STOCK_SAVE, self.port.RESPONSE_OK))
-        dialog.set_default_response(self.port.RESPONSE_OK)
-        dialog.set_do_overwrite_confirmation(True)
-
-        file_filter = Gtk.FileFilter()
-        file_filter.add_pattern("*.json")
-        file_filter.set_name("JSON (*.json)")
-        dialog.add_filter(file_filter)
-
-        file_filter = Gtk.FileFilter()
-        file_filter.add_pattern("*")
-        file_filter.set_name("All files (*.*)")
-        dialog.add_filter(file_filter)
-
-        response = dialog.run()
-        msg = None
-        if response == self.port.RESPONSE_OK:
-            filename = dialog.get_filename()
-            if not filename.endswith('.json'):
-                filename += '.json'
-            dump = self.meshstatus.dump()
-            if dump:
-                with open(filename, 'w') as f:
-                    f.write(dump)
-            else:
-                msg = Gtk.MessageDialog(toplevel,
-                                        self.port.DIALOG_DESTROY_WITH_PARENT,
-                                        self.port.MESSAGE_ERROR,
-                                        (Gtk.BUTTONS_CLOSE),
-                                        'Nothing was written because olsrd is not running, there is no active mesh profile!')
-                msg.run()
-                msg.destroy()
-        dialog.destroy()
+#    def save_mesh_status_to_file(self, *arguments):
+#        toplevel = arguments[0].get_toplevel()
+#        dialog = Gtk.FileChooserDialog("Save Mesh Status to File...",
+#                                       toplevel,
+#                                       self.port.FILE_CHOOSER_ACTION_SAVE,
+#                                       (Gtk.STOCK_CANCEL, self.port.RESPONSE_CANCEL,
+#                                        Gtk.STOCK_SAVE, self.port.RESPONSE_OK))
+#        dialog.set_default_response(self.port.RESPONSE_OK)
+#        dialog.set_do_overwrite_confirmation(True)
+#
+#        file_filter = Gtk.FileFilter()
+#        file_filter.add_pattern("*.json")
+#        file_filter.set_name("JSON (*.json)")
+#        dialog.add_filter(file_filter)
+#
+#        file_filter = Gtk.FileFilter()
+#        file_filter.add_pattern("*")
+#        file_filter.set_name("All files (*.*)")
+#        dialog.add_filter(file_filter)
+#
+#        response = dialog.run()
+#        msg = None
+#        if response == self.port.RESPONSE_OK:
+#            filename = dialog.get_filename()
+#            if not filename.endswith('.json'):
+#                filename += '.json'
+#            dump = self.meshstatus.dump()
+#            if dump:
+#                with open(filename, 'w') as f:
+#                    f.write(dump)
+#            else:
+#                msg = Gtk.MessageDialog(toplevel,
+#                                        self.port.DIALOG_DESTROY_WITH_PARENT,
+#                                        self.port.MESSAGE_ERROR,
+#                                        (Gtk.BUTTONS_CLOSE),
+#                                        'Nothing was written because olsrd is not running, there is no active mesh profile!')
+#                msg.run()
+#                msg.destroy()
+#        dialog.destroy()
 
     def disconnect(self, *arguments):
         if 'asleep' in subprocess.check_output(['/usr/bin/nmcli', 'nm', 'status']):
