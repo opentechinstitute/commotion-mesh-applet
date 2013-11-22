@@ -1,15 +1,14 @@
 #!/usr/bin/python
 
 import dbus.mainloop.glib ; dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-import glob
 import json
 import NetworkManager
 import os
-import pyjavaproperties
 import sys
 import urllib2
-
 import pprint
+import subprocess
+import commotionc
 
 try:
     from gi.repository import Gtk, GObject
@@ -99,7 +98,7 @@ class MeshStatus():
                 self.liststore.append(cell)
         else:
             self.mesh_connected = False
-        if link:
+        if 'link' in locals():
             self.myip = link['localIP']
         else:
             self.myip = ''
@@ -219,9 +218,9 @@ class CommotionMeshApplet():
     nm_icon_dir = '/usr/share/icons/hicolor/22x22/apps'
 
     def __init__(self, portinghacks):
+        self.commotion = commotionc.CommotionCore('commotion-mesh-applet')
         self.port = portinghacks
         self.meshstatus = MeshStatus(portinghacks)
-
         self.menu = Gtk.Menu()
         # update the menu whenever NetworkManager changes
         NetworkManager.NetworkManager.connect_to_signal('StateChanged', self.create_menu)
@@ -234,7 +233,7 @@ class CommotionMeshApplet():
         actives = []
         nets = []
         strengths = dict()
-        for ac in NetworkManager.NetworkManager.ActiveConnections:
+        for ac in NetworkManager.NetworkManager.ActiveConnections: #This won't work if there isn't already an active connection
             for d in ac.Devices:
                 if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
                     wireless = d.SpecificDevice()
@@ -244,23 +243,10 @@ class CommotionMeshApplet():
                         actives.append(tuple([aap.Ssid, aap.HwAddress, channel]))
                     for ap in wireless.GetAccessPoints():
                         if ap.Mode == NetworkManager.NM_802_11_MODE_ADHOC:
-                            channel = (aap.Frequency - 2407) / 5
+                            channel = (ap.Frequency - 2407) / 5
                             nets.append(tuple([ap.Ssid, ap.HwAddress, channel]))
                             strengths[ap.Ssid] = ap.Strength
         return [tuple(actives), tuple(nets), strengths]
-
-
-    def get_profiles(self):
-        '''get all the available mesh profiles and return as a list of tuples'''
-        profiles = []
-        for f in glob.glob('/etc/nm-dispatcher-olsrd/*.profile'):
-            p = pyjavaproperties.Properties()
-            p.load(open(f))
-            bssid = p['bssid'].upper()
-            channel = int(p['channel'])
-            profiles.append(tuple([p['ssid'], bssid, channel]))
-        return tuple(profiles)
-
 
     def add_menu_about(self):
         self.add_menu_item(self.port.STOCK_ABOUT, self.show_about)
@@ -277,11 +263,13 @@ class CommotionMeshApplet():
 
 
     def add_menu_item(self, name, function, imagefile=None):
-        item = Gtk.ImageMenuItem(name)
+        item = Gtk.ImageMenuItem()
         if imagefile:
             icon = Gtk.Image()
             icon.set_from_file(imagefile)
             item.set_image(icon)
+            item.set_always_show_image(True)
+        item.set_label(name)
         item.show()
         item.connect( "activate", function)
         self.menu.add(item)
@@ -296,20 +284,15 @@ class CommotionMeshApplet():
 
     def add_visible_profile_menu_item(self, name, function, strength):
         if strength > 98:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-100.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-100.png'))
         elif strength >= 75:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-75.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-75.png'))
         elif strength >= 50:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-50.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-50.png'))
         elif strength >= 25:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-25.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-25.png'))
         else:
-            self.add_menu_item(self.menu, name, function,
-                               os.path.join(self.nm_icon_dir, 'nm-signal-00.png'))
+            self.add_menu_item(name, function, os.path.join(self.nm_icon_dir, 'nm-signal-00.png'))
 
 
     def choose_profile(self, *arguments):
@@ -321,23 +304,32 @@ class CommotionMeshApplet():
         try:
             conn = connections[name]
         except KeyError as e:
-            print('error: ' + name + ' does not exist as a connection (' + str(e) + ')')
+            self.commotion.log('error: ' + name + ' does not exist as a connection (' + str(e) + ')')
             return
 
         ctype = conn.GetSettings()['connection']['type']
         if ctype != '802-11-wireless':
-            print(name + ' is not a wifi device!')
+            self.commotion.log(name + ' is not a wifi device!')
             return
 
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
-            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
+            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State > 20: #dev.State values 0, 10, and 20 indicate that interface is in an unusable state
+                #if dev.Interface == self.commotion.selectInterface(): #dev.Driver
                 break
+	
         else:
-            print('No wifi device found!')
+            self.commotion.log('No wifi device found!')
             return
+         
+        wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v')
+        if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
+            self.commotion.log('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
+            ## dev.Disconnect() Necessary?
+            subprocess.Popen(['gksudo', '/usr/share/pyshared/fallback.py ' + name + ' up'])
 
-        NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
+        else:
+	    NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
 
 
     def show_menu(self, widget, event, applet):
@@ -353,7 +345,7 @@ class CommotionMeshApplet():
 
         header_added = False
         actives, visibles, strengths = self.get_visible_adhocs()
-        profiles = self.get_profiles()
+        profiles = ((params['ssid'], params['bssid'], int(params['channel'])) for profile, params in self.commotion.readProfiles().iteritems())
         for profile in actives:
             if profile in profiles:
                 if not header_added:
@@ -363,6 +355,10 @@ class CommotionMeshApplet():
                                    os.path.join(self.nm_icon_dir, 'nm-adhoc.png'))
                 self.add_menu_label('BSSID: ' + profile[1])
                 self.add_menu_label('Channel: ' + str(profile[2]))
+                self.add_menu_separator()
+                self.add_menu_item('Browse Local Apps...', self.launch_app_browser)
+                self.add_menu_item('Show Mesh Status', self.show_mesh_status)
+                self.add_menu_item('Disconnect From Mesh', self.disconnect)
                 self.add_menu_separator()
 
         self.add_menu_label('Available Profiles')
@@ -375,10 +371,13 @@ class CommotionMeshApplet():
             else:
                 self.add_menu_item(profile[0], self.choose_profile)
 
-        self.add_menu_separator()
-        self.add_menu_item('Show Mesh Status', self.show_mesh_status)
-        self.add_menu_item('Show Debug Log', self.show_debug_log)
-        self.add_menu_item('Save Mesh Status To File...', self.save_mesh_status_to_file)
+        self.add_menu_item('Edit Mesh Network Profiles...', self.edit_profiles)
+        self.add_menu_item('Disconnect All Mesh Connections', self.disconnect)
+        #self.add_menu_item('Show Debug Log', self.show_debug_log)
+        if not header_added:
+                self.add_menu_label('Browse Local Apps...')
+                self.add_menu_label('Show Mesh Status')
+                self.add_menu_label('Disconnect From Mesh')
         self.add_menu_separator()
         self.add_menu_about()
         self.add_menu_quit()
@@ -386,54 +385,70 @@ class CommotionMeshApplet():
         return True
 
 
+    def edit_profiles(self, *arguments):
+        subprocess.call(['xdg-open', self.commotion.profiledir])
+        subprocess.call(['gksudo', '/etc/NetworkManager/dispatcher.d/nm-dispatcher-olsrd none none'])
+
+    def launch_app_browser(self, *arguments):
+        os.system('xdg-open http://localhost:8080 &')
+
+        
     def show_mesh_status(self, *arguments):
         self.meshstatus.show()
 
 
-    def show_debug_log(self, *arguments):
-        os.system('xdg-open /tmp/nm-dispatcher-olsrd.log &')
+#    def show_debug_log(self, *arguments):
+#        os.system('xdg-open /tmp/nm-dispatcher-olsrd.log &')
 
 
-    def save_mesh_status_to_file(self, *arguments):
-        toplevel = arguments[0].get_toplevel()
-        dialog = Gtk.FileChooserDialog("Save Mesh Status to File...",
-                                       toplevel,
-                                       self.port.FILE_CHOOSER_ACTION_SAVE,
-                                       (Gtk.STOCK_CANCEL, self.port.RESPONSE_CANCEL,
-                                        Gtk.STOCK_SAVE, self.port.RESPONSE_OK))
-        dialog.set_default_response(self.port.RESPONSE_OK)
-        dialog.set_do_overwrite_confirmation(True)
+#    def save_mesh_status_to_file(self, *arguments):
+#        toplevel = arguments[0].get_toplevel()
+#        dialog = Gtk.FileChooserDialog("Save Mesh Status to File...",
+#                                       toplevel,
+#                                       self.port.FILE_CHOOSER_ACTION_SAVE,
+#                                       (Gtk.STOCK_CANCEL, self.port.RESPONSE_CANCEL,
+#                                        Gtk.STOCK_SAVE, self.port.RESPONSE_OK))
+#        dialog.set_default_response(self.port.RESPONSE_OK)
+#        dialog.set_do_overwrite_confirmation(True)
+#
+#        file_filter = Gtk.FileFilter()
+#        file_filter.add_pattern("*.json")
+#        file_filter.set_name("JSON (*.json)")
+#        dialog.add_filter(file_filter)
+#
+#        file_filter = Gtk.FileFilter()
+#        file_filter.add_pattern("*")
+#        file_filter.set_name("All files (*.*)")
+#        dialog.add_filter(file_filter)
+#
+#        response = dialog.run()
+#        msg = None
+#        if response == self.port.RESPONSE_OK:
+#            filename = dialog.get_filename()
+#            if not filename.endswith('.json'):
+#                filename += '.json'
+#            dump = self.meshstatus.dump()
+#            if dump:
+#                with open(filename, 'w') as f:
+#                    f.write(dump)
+#            else:
+#                msg = Gtk.MessageDialog(toplevel,
+#                                        self.port.DIALOG_DESTROY_WITH_PARENT,
+#                                        self.port.MESSAGE_ERROR,
+#                                        (Gtk.BUTTONS_CLOSE),
+#                                        'Nothing was written because olsrd is not running, there is no active mesh profile!')
+#                msg.run()
+#                msg.destroy()
+#        dialog.destroy()
 
-        file_filter = Gtk.FileFilter()
-        file_filter.add_pattern("*.json")
-        file_filter.set_name("JSON (*.json)")
-        dialog.add_filter(file_filter)
-
-        file_filter = Gtk.FileFilter()
-        file_filter.add_pattern("*")
-        file_filter.set_name("All files (*.*)")
-        dialog.add_filter(file_filter)
-
-        response = dialog.run()
-        msg = None
-        if response == self.port.RESPONSE_OK:
-            filename = dialog.get_filename()
-            if not filename.endswith('.json'):
-                filename += '.json'
-            dump = self.meshstatus.dump()
-            if dump:
-                with open(filename, 'w') as f:
-                    f.write(dump)
-            else:
-                msg = Gtk.MessageDialog(toplevel,
-                                        self.port.DIALOG_DESTROY_WITH_PARENT,
-                                        self.port.MESSAGE_ERROR,
-                                        (Gtk.BUTTONS_CLOSE),
-                                        'Nothing was written because olsrd is not running, there is no active mesh profile!')
-                msg.run()
-                msg.destroy()
-        dialog.destroy()
-
+    def disconnect(self, *arguments):
+        if 'asleep' in subprocess.check_output(['/usr/bin/nmcli', 'nm', 'status']):
+            subprocess.call(['gksudo', '/usr/share/pyshared/fallback.py', 'all down'])
+        else:
+            for ac in NetworkManager.NetworkManager.ActiveConnections:
+                for d in ac.Devices:
+                    if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
+                        NetworkManager.NetworkManager.DeactivateConnection(ac)
 
     def show_about(self, *arguments):
         about_dialog = Gtk.AboutDialog()

@@ -2,6 +2,8 @@ debian/files
 debian/commotion-mesh-applet.debhelper.log
 debian/commotion-mesh-applet.substvars
 debian/commotion-mesh-applet/
+debian/commotion-mesh-applet.postinst.debhelper
+debian/commotion-mesh-applet.prerm.debhelper
 # python build products
 *.pyc
 # example code

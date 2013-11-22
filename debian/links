@@ -1,2 +1,3 @@
 usr/share/pyshared/commotion_applet_support.py   usr/lib/python2.6/dist-packages/commotion_applet_support.py
 usr/share/pyshared/commotion_applet_support.py   usr/lib/python2.7/dist-packages/commotion_applet_support.py
+etc/xdg/autostart/commotion-mesh-applet.desktop  usr/share/applications/commotion-mesh-applet.desktop

@@ -1,12 +1,11 @@
-
 [Desktop Entry]
 Encoding=UTF-8
+Type=Application
 Name=Commotion Mesh Applet
-Description=represent the state of an olsrd mesh connection
+Comment=Graphical applet for managing Commotion Wireless connections
+Description=Graphical applet for managing Commotion Wireless connections
 Icon=/usr/share/icons/hicolor/scalable/apps/commotion.svg
 Exec=/usr/lib/gnome-applets/commotion-mesh-applet
 Terminal=false
-Type=Application
-StartupNotify=false
-NoDisplay=true
+StartupNotify=true
 Categories=System;Monitor;GTK;
