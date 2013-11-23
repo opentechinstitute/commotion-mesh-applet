@@ -309,23 +309,29 @@ class CommotionMeshApplet():
 
         ctype = conn.GetSettings()['connection']['type']
         if ctype != '802-11-wireless':
-            self.commotion.log(name + ' is not a wifi device!')
+            self.commotion.log(name + ' is not a wireless device!')
             return
 
         devices = NetworkManager.NetworkManager.GetDevices()
+        fallback = None
         for dev in devices:
-            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State > 20: #dev.State values 0, 10, and 20 indicate that interface is in an unusable state
-                #if dev.Interface == self.commotion.selectInterface(): #dev.Driver
+	    if dev.Interface == self.commotion.getInterface() and dev.State > 20: #dev.Driver#dev.State values 0, 10, and 20 indicate that interface is in an unusable state
                 break
-	
+            elif dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State > 20: #dev.State values 0, 10, and 20 indicate that interface is in an unusable state
+                fallback = dev
+
         else:
-            self.commotion.log('No wifi device found!')
-            return
-         
+            if fallback: #and self.commotion.alt_iface:
+                dev = fallback
+                self.commotion.log("Specified and/or optimal interface is unavailable.  Trying " + dev.Interface + " instead.")
+            else:
+                self.commotion.log('No active and mesh-compatible wireless device found!')
+                return
+
+        self.disconnect() 
         wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             self.commotion.log('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
-            ## dev.Disconnect() Necessary?
             subprocess.Popen(['gksudo', '/usr/share/pyshared/fallback.py ' + name + ' up'])
 
         else:
