@@ -328,7 +328,7 @@ class CommotionMeshApplet():
                 self.commotion.log('No active and mesh-compatible wireless device found!')
                 return
 
-        self.disconnect() 
+        self.disconnect() #This has multiple benefits, forcing nm-dispatcher-olsrd to reparse any new mesh profiles before initiating a connection. 
         wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             self.commotion.log('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
@@ -370,14 +370,14 @@ class CommotionMeshApplet():
         self.add_menu_label('Available Profiles')
         for profile in profiles:
             if profile in actives:
-                continue
+                self.add_menu_label('Connected to ' + profile[0])
             elif profile in visibles:
                 self.add_visible_profile_menu_item(profile[0], self.choose_profile,
                                                    strengths[profile[0]])
             else:
                 self.add_menu_item(profile[0], self.choose_profile)
+            self.add_menu_item('Edit ' + profile[0] + '...', self.edit_profile)
 
-        self.add_menu_item('Edit Mesh Network Profiles...', self.edit_profiles)
         self.add_menu_item('Disconnect All Mesh Connections', self.disconnect)
         #self.add_menu_item('Show Debug Log', self.show_debug_log)
         if not header_added:
@@ -391,9 +391,15 @@ class CommotionMeshApplet():
         return True
 
 
-    def edit_profiles(self, *arguments):
-        subprocess.call(['xdg-open', self.commotion.profiledir])
+    def edit_profile(self, *arguments):
+        name = arguments[0].get_label().strip('.').split()[1]
+	#Move all this checking and whatnot into the dedicated script itself, so that gksu only need be called once
+        try: 
+            subprocess.check_call(['gksudo', '/usr/share/pyshared/commotion-profile-editor.py ' + self.commotion.profiledir + name + '.profile'])
+        except:
+            subprocess.call(['gksudo', '/usr/bin/gedit ' + self.commotion.profiledir + name + '.profile'])
         subprocess.call(['gksudo', '/etc/NetworkManager/dispatcher.d/nm-dispatcher-olsrd none none'])
+        self.create_menu()
 
     def launch_app_browser(self, *arguments):
         os.system('xdg-open http://localhost:8080 &')
