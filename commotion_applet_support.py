@@ -455,7 +455,7 @@ class CommotionMeshApplet():
 
     def disconnect(self, *arguments):
         if 'asleep' in subprocess.check_output(['/usr/bin/nmcli', 'nm', 'status']):
-            subprocess.call(['gksudo', '/usr/share/pyshared/fallback.py', 'all down'])
+            subprocess.call(['gksudo', '/usr/share/pyshared/fallback.py all down'])
         else:
             for ac in NetworkManager.NetworkManager.ActiveConnections:
                 for d in ac.Devices:
