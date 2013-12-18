@@ -327,8 +327,7 @@ class CommotionMeshApplet():
             else:
                 self.commotion.log('No active and mesh-compatible wireless device found!')
                 return
-
-        self.disconnect() #This has multiple benefits, forcing nm-dispatcher-olsrd to reparse any new mesh profiles before initiating a connection. 
+        NetworkManager.NetworkManager.DeactivateConnection(dev.ActiveConnection) #This has multiple benefits, forcing nm-dispatcher-olsrd to reparse any new mesh profiles before initiating a connection. 
         wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v')
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             self.commotion.log('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
@@ -459,7 +458,7 @@ class CommotionMeshApplet():
         else:
             for ac in NetworkManager.NetworkManager.ActiveConnections:
                 for d in ac.Devices:
-                    if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
+                    if d.SpecificDevice().ActiveAccessPoint.Mode == NetworkManager.NM_802_11_MODE_ADHOC:
                         NetworkManager.NetworkManager.DeactivateConnection(ac)
 
     def show_about(self, *arguments):
