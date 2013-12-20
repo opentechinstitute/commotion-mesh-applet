@@ -228,12 +228,12 @@ class CommotionMeshApplet():
         NetworkManager.NetworkManager.connect_to_signal('DeviceAdded', self.create_menu)
         NetworkManager.NetworkManager.connect_to_signal('DeviceRemoved', self.create_menu)
 
-
+    # Find all visible (in range) adhoc networks to determine appropriate signal strength icon.  
     def get_visible_adhocs(self):
         actives = []
         nets = []
         strengths = dict()
-        for ac in NetworkManager.NetworkManager.ActiveConnections: #This won't work if there isn't already an active connection
+        for ac in NetworkManager.NetworkManager.ActiveConnections: #This entire routine doesn't work if there isn't already an active connection
             for d in ac.Devices:
                 if d.Managed and d.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
                     wireless = d.SpecificDevice()
@@ -261,7 +261,7 @@ class CommotionMeshApplet():
         sep.show()
         self.menu.add(sep)
 
-
+    # Add clickable menu item with title 'name', which when clicked will launch 'function'
     def add_menu_item(self, name, function, imagefile=None):
         item = Gtk.ImageMenuItem()
         if imagefile:
@@ -274,7 +274,7 @@ class CommotionMeshApplet():
         item.connect( "activate", function)
         self.menu.add(item)
 
-
+    # Add non-clickable menu item with title 'name'
     def add_menu_label(self, name):
         item = Gtk.ImageMenuItem(name)
         item.set_sensitive(False)
@@ -314,21 +314,27 @@ class CommotionMeshApplet():
 
         devices = NetworkManager.NetworkManager.GetDevices()
         fallback = None
+	# Loop through all available network interfaces, and try to find one that commotion identifies as being maximally mesh-compatible.
         for dev in devices:
 	    if dev.Interface == self.commotion.getInterface() and dev.State > 20: #dev.Driver#dev.State values 0, 10, and 20 indicate that interface is in an unusable state
                 break
+            # In case we don't find a maximally mesh-compatible interface, pick a fallback option
             elif dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State > 20: #dev.State values 0, 10, and 20 indicate that interface is in an unusable state
                 fallback = dev
-
-        else:
-            if fallback: #and self.commotion.alt_iface:
+	
+        else: # Pythonic loop else, invoked if the loop terminates without breaking
+            if fallback: #If we found a fallback, use it.  Also check if self.commotion.alt_iface=yes, from /etc/commotion/conf
                 dev = fallback
                 self.commotion.log("Specified and/or optimal interface is unavailable.  Trying " + dev.Interface + " instead.")
             else:
                 self.commotion.log('No active and mesh-compatible wireless device found!')
                 return
-        NetworkManager.NetworkManager.DeactivateConnection(dev.ActiveConnection) #This has multiple benefits, forcing nm-dispatcher-olsrd to reparse any new mesh profiles before initiating a connection. 
-        wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v')
+	
+        if dev.State > 30: #dev.State values greater than 30 indicate that interface is at least partly connected to a network
+            # Disconnecting before connecting has multiple benefits, forcing nm-dispatcher-olsrd to reparse any new mesh profiles before initiating a connection. 
+            NetworkManager.NetworkManager.DeactivateConnection(dev.ActiveConnection) 
+	 #This is an inadequate check for IBSS_RSN support in wpa_supplicant. Versions > 1.0 may not have IBSS_RSN support compiled in, as is the case with Debian testing
+        wpa_ver = subprocess.check_output(['/sbin/wpa_supplicant', '-v']).split()[1].strip('v') 
         if int(wpa_ver.split('.')[0]) < 1 and '802-11-wireless-security' in conn.GetSettings():
             self.commotion.log('wpa_supplicant version ' + wpa_ver + ' does not support ad-hoc encryption.  Starting replacement version...')
             subprocess.Popen(['gksudo', '/usr/share/pyshared/fallback.py ' + name + ' up'])
@@ -363,7 +369,6 @@ class CommotionMeshApplet():
                 self.add_menu_separator()
                 self.add_menu_item('Browse Local Apps...', self.launch_app_browser)
                 self.add_menu_item('Show Mesh Status', self.show_mesh_status)
-                self.add_menu_item('Disconnect From Mesh', self.disconnect)
                 self.add_menu_separator()
 
         self.add_menu_label('Available Profiles')
@@ -376,13 +381,13 @@ class CommotionMeshApplet():
             else:
                 self.add_menu_item(profile[0], self.choose_profile)
             self.add_menu_item('Edit ' + profile[0] + '...', self.edit_profile)
-
+        # Provide a global disconnect option at all times, in case of partial connections 
         self.add_menu_item('Disconnect All Mesh Connections', self.disconnect)
-        #self.add_menu_item('Show Debug Log', self.show_debug_log)
+        # If a header hasn't been added, there is no active mesh connection, so we show disabled entires for the menu items that require an active mesh to function.  
         if not header_added:
+                self.add_menu_separator()
                 self.add_menu_label('Browse Local Apps...')
                 self.add_menu_label('Show Mesh Status')
-                self.add_menu_label('Disconnect From Mesh')
         self.add_menu_separator()
         self.add_menu_about()
         self.add_menu_quit()
@@ -393,11 +398,14 @@ class CommotionMeshApplet():
     def edit_profile(self, *arguments):
         name = arguments[0].get_label().strip('.').split()[1]
 	#Move all this checking and whatnot into the dedicated script itself, so that gksu only need be called once
+        # Try to launch dedicated python editor; if that fails, launch gedit as a fallback
         try: 
             subprocess.check_call(['gksudo', '/usr/share/pyshared/commotion-profile-editor.py ' + self.commotion.profiledir + name + '.profile'])
         except:
             subprocess.call(['gksudo', '/usr/bin/gedit ' + self.commotion.profiledir + name + '.profile'])
+        # When the editor exits, call commotion-nm-dispatcher to update the profile's system connection
         subprocess.call(['gksudo', '/etc/NetworkManager/dispatcher.d/nm-dispatcher-olsrd none none'])
+        # Now update the menu to reflect any new/modified profiles
         self.create_menu()
 
     def launch_app_browser(self, *arguments):
@@ -452,6 +460,7 @@ class CommotionMeshApplet():
 #                msg.destroy()
 #        dialog.destroy()
 
+    # Disconnect all active mesh networks, and restore control of network stack to network manager if the fallback pathway was active
     def disconnect(self, *arguments):
         if 'asleep' in subprocess.check_output(['/usr/bin/nmcli', 'nm', 'status']):
             subprocess.call(['gksudo', '/usr/share/pyshared/fallback.py all down'])
