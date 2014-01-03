@@ -13,15 +13,16 @@ Installing
 ----------
 
 If you are using Debian, Ubuntu, Mint, or any other Debian-derivative, you can
-install Commotion by running these three lines in your Terminal app:
+install Commotion by downloading all .deb packages located at
+https://downloads.commotionwireless.net/linux, and installing them with:
 
-    sudo add-apt-repository ppa:guardianproject/commotion
-    sudo apt-get update
-    sudo apt-get install commotion-mesh-applet
+sudo dpkg -i \*.deb
 
-You should see the key ID 6B80A84207B30AC9DEE235FEF50EADDD2234F563 (aka
-2234F563) flash by as part of that process.
+If you encounter any dependency errors during this process, simply run:
 
+apt-get install -f
+
+to resolve the problems, and then run the original dpkg command once again.  
 
 Bugs
 ----
@@ -29,7 +30,7 @@ Bugs
 If you encounter any problems or wish to request features, please add them to
 our issue tracker:
 
-https://code.commotionwireless.net/projects/commotion-linux/issues
+https://github.com/opentechinstitute/commotion-mesh-applet
 
 
 Building
@@ -42,6 +43,7 @@ this easy for people to do.
 Check the `debian/control` file for a list of standard libraries that are
 required.  Here are the other libraries needed:
 
+* https://github.com/opentechinstitute/commotion-linux-py
 * https://github.com/opentechinstitute/nm-dispatcher-olsrd
 * https://pypi.python.org/pypi/pyjavaproperties
 * https://pypi.python.org/pypi/python-networkmanager

@@ -6,6 +6,7 @@ commotion-mesh-applet.server usr/lib/bonobo/servers
 commotion-mesh-applet-factoryMate.py /usr/lib/mate-applets
 commotion-mesh-applet-mate.server usr/lib/matecomponent/servers
 commotion_applet_support.py    usr/share/pyshared/
+commotion-profile-editor.py    usr/share/pyshared/
 xfce4/commotion-mesh-applet.desktop   usr/share/xfce4/panel-plugins/
 commotion.svg                   usr/share/icons/hicolor/scalable/apps/
 commotion-mesh-connected.svg    usr/share/icons/hicolor/scalable/apps/
